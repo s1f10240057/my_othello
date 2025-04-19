@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styles from './page.module.css';
 
 // fawfe
@@ -8,6 +8,17 @@ const Home = () => {
   const [turnColor, setTurnColor] = useState(1);
   const [black, setblack] = useState<number>(0);
   const [white, setwhite] = useState<number>(0);
+
+  const [CountBoard, setCount] = useState([
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+  ]);
 
   const direction_lst = [
     [1, 0], //右
@@ -31,16 +42,50 @@ const Home = () => {
     [0, 0, 0, 0, 0, 0, 0, 0],
   ]);
 
-  // const [board, setBoard] = useState([
-  //   [1, 0, 0, 1, 0, 0, 1, 0],
-  //   [0, 2, 0, 2, 0, 2, 0, 0],
-  //   [0, 0, 2, 2, 2, 0, 0, 0],
-  //   [1, 2, 2, 0, 2, 2, 2, 1],
-  //   [0, 0, 2, 2, 2, 0, 0, 0],
-  //   [0, 2, 2, 2, 0, 2, 0, 0],
-  //   [1, 2, 0, 2, 0, 0, 2, 0],
-  //   [1, 0, 0, 1, 0, 0, 0, 1],
-  // ]);
+  // const CreateNewBoard = () => {
+  //   const newboard = [
+  //     [0, 0, 0, 0, 0, 0, 0, 0],
+  //     [0, 0, 0, 0, 0, 0, 0, 0],
+  //     [0, 0, 0, 0, 0, 0, 0, 0],
+  //     [0, 0, 0, 0, 0, 0, 0, 0],
+  //     [0, 0, 0, 0, 0, 0, 0, 0],
+  //     [0, 0, 0, 0, 0, 0, 0, 0],
+  //     [0, 0, 0, 0, 0, 0, 0, 0],
+  //     [0, 0, 0, 0, 0, 0, 0, 0],
+  //   ];
+  //   return newboard;
+  // };
+
+  const MarkCanPut = () => {
+    const newcountboard = [
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+    ];
+    let allcount = 0;
+    for (let y: number = 0; y < 8; y++) {
+      for (let x: number = 0; x < 8; x++) {
+        allcount = 0;
+        if (board[y][x] === 0) {
+          for (let i: number = 0; i < 8; i++) {
+            allcount += Inversioncount(x, y, direction_lst[i]);
+          }
+
+          if (allcount !== 0) {
+            console.log(allcount);
+          }
+          newcountboard[y][x] = allcount;
+        }
+      }
+    }
+    console.log(newcountboard);
+    return newcountboard;
+  };
 
   const CountStone = (board: number[][]) => {
     let black = 0;
@@ -107,7 +152,6 @@ const Home = () => {
     if (board[y][x] === 0 && allcount !== 0) {
       newBoard[y][x] = turnColor;
       for (let i: number = 0; i < 8; i++) {
-        console.log(`${count_lst[i]}:${i}`);
         if (count_lst[i] !== 0) {
           Inversionprocessing(x, y, count_lst[i], direction_lst[i], newBoard);
         }
@@ -116,7 +160,14 @@ const Home = () => {
     }
     setBoard(newBoard);
     CountStone(newBoard);
+    const countb = MarkCanPut();
+    setCount(countb);
+    console.log(CountBoard);
   };
+
+  useEffect(() => {
+    CountStone(board);
+  });
 
   return (
     <div className={styles.container}>
@@ -135,7 +186,8 @@ const Home = () => {
         )}
         {
           <p>
-            黒:{black}\n白{white}
+            黒:{black}白{white}
+            {CountBoard}
           </p>
         }
       </div>
