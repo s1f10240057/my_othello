@@ -8,25 +8,36 @@ const Home = () => {
   const [turnColor, setTurnColor] = useState(1);
 
   const direction_lst = [
-    [1, 0],
-    [1, 1],
-    [0, 1],
-    [-1, 1],
-    [-1, 0],
-    [-1, -1],
-    [0, -1],
-    [1, -1],
+    [1, 0], //右
+    [1, 1], //右上
+    [0, 1], // 上
+    [-1, 1], // 左上
+    [-1, 0], //左
+    [-1, -1], //左下
+    [0, -1], //下
+    [1, -1], //右下
   ];
 
+  // const [board, setBoard] = useState([
+  //   [0, 0, 0, 0, 0, 0, 0, 0],
+  //   [0, 0, 0, 0, 0, 0, 0, 0],
+  //   [0, 0, 0, 0, 0, 0, 0, 0],
+  //   [0, 0, 0, 1, 2, 2, 2, 0],
+  //   [0, 0, 0, 2, 1, 0, 0, 0],
+  //   [0, 0, 0, 0, 0, 0, 0, 0],
+  //   [0, 0, 0, 0, 0, 0, 0, 0],
+  //   [0, 0, 0, 0, 0, 0, 0, 0],
+  // ]);
+
   const [board, setBoard] = useState([
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 1, 2, 2, 2, 0],
-    [0, 0, 0, 2, 1, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 1, 0, 0, 1, 0],
+    [0, 2, 0, 2, 0, 2, 0, 0],
+    [0, 0, 2, 2, 2, 0, 0, 0],
+    [1, 2, 2, 0, 2, 2, 2, 1],
+    [0, 0, 2, 2, 2, 0, 0, 0],
+    [0, 2, 2, 2, 0, 2, 0, 0],
+    [1, 2, 0, 2, 0, 0, 2, 0],
+    [1, 0, 0, 1, 0, 0, 0, 1],
   ]);
 
   const Inversionprocessing = (
@@ -38,7 +49,6 @@ const Home = () => {
   ) => {
     for (let n: number = 1; n <= count; n++) {
       newBoard[y + direction[1] * n][x + direction[0] * n] = turnColor;
-      console.log(`n:${n}:${newBoard[y + direction[1] * n][x + direction[0] * n]}`);
     }
     setBoard(newBoard);
   };
@@ -48,7 +58,11 @@ const Home = () => {
     let count = 0;
     while (true) {
       n += 1;
-      if (board[y + direction[1] * n] === undefined || board[x + direction[0] * n] === undefined) {
+      if (
+        board[y + direction[1] * n] === undefined ||
+        board[x + direction[0] * n] === undefined ||
+        board[y + direction[1] * n][x + direction[0] * n] === 0
+      ) {
         count = 0;
         break;
       } else if (board[y + direction[1] * n][x + direction[0] * n] === turnColor) {
@@ -62,39 +76,27 @@ const Home = () => {
 
   const clickHandler = (x: number, y: number) => {
     const newBoard = structuredClone(board);
+    let allcount = 0;
+    const count_lst = [];
 
-    if (board[y][x] === 0) {
-      for (let i: number = 0; i < 7; i++) {
-        if (board[y + direction_lst[i][1]][x + direction_lst[i][0]] === 2 / turnColor) {
-          newBoard[y][x] = turnColor;
-          for (let i: number = 0; i < 7; i++) {
-            const count = Inversioncount(x, y, direction_lst[i]);
-            if (count !== 0) {
-              Inversionprocessing(x, y, count, direction_lst[i], newBoard);
-            }
-          }
-          setTurnColor(2 / turnColor);
-          break;
+    for (let i: number = 0; i < 8; i++) {
+      const count = Inversioncount(x, y, direction_lst[i]);
+      allcount += count;
+      count_lst.push(count);
+    }
+
+    if (board[y][x] === 0 && allcount !== 0) {
+      newBoard[y][x] = turnColor;
+      for (let i: number = 0; i < 8; i++) {
+        if (count_lst[i] !== 0) {
+          Inversionprocessing(x, y, count_lst[i], direction_lst[i], newBoard);
         }
+        setTurnColor(2 / turnColor);
+        break;
       }
     }
     setBoard(newBoard);
   };
-
-  // let target_x = x + direction_lst[i][0]
-  // let target_y = y + direction_lst[i][1]
-  // for (let i: number = 0; i < 7; i++) {
-  //   if (
-  //     board[y] !== undefined &&
-  //     board[x] !== undefined &&
-  //     board[y][x] === 0 &&
-
-  //   ) {
-  //     newBoard[y][x] = turnColor;
-  //     setTurnColor(2 / turnColor);
-  //   }
-  // }
-  // setBoard(newBoard);
 
   return (
     <div className={styles.container}>
