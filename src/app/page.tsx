@@ -1,24 +1,27 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import styles from './page.module.css';
 
 // fawfe
 const Home = () => {
   const [turnColor, setTurnColor] = useState(1);
-  const [stornsNum, setstornsNum] = useState([2, 2]);
-  const [turn, setTrunNum] = useState<number>(0);
+  const [stornsNum, setstonesNum] = useState([2, 2]);
+  const [turn, setTurnNum] = useState<number>(0);
 
-  const direction_lst = [
-    [1, 0], //右
-    [1, 1], //右上
-    [0, 1], // 上
-    [-1, 1], // 左上
-    [-1, 0], //左
-    [-1, -1], //左下
-    [0, -1], //下
-    [1, -1], //右下
-  ];
+  const direction_lst = useMemo(
+    () => [
+      [1, 0], //右
+      [1, 1], //右上
+      [0, 1], // 上
+      [-1, 1], // 左上
+      [-1, 0], //左
+      [-1, -1], //左下
+      [0, -1], //下
+      [1, -1], //右下
+    ],
+    [],
+  );
 
   const [board, setBoard] = useState([
     [0, 0, 0, 0, 0, 0, 0, 0],
@@ -31,65 +34,75 @@ const Home = () => {
     [0, 0, 0, 0, 0, 0, 0, 0],
   ]);
 
-  const MarkCanPut = () => {
-    const newcountboard = structuredClone(board);
-    let allcount = 0;
-    for (let y: number = 0; y < 8; y++) {
-      for (let x: number = 0; x < 8; x++) {
-        allcount = 0;
-        if (board[y][x] <= 0) {
-          for (let i: number = 0; i < 8; i++) {
-            allcount += inversionCount(x, y, direction_lst[i]);
-          }
-          newcountboard[y][x] = -allcount;
+  const inversionCount = useCallback(
+    (x: number, y: number, direction: number[], boardToNum: number[][]) => {
+      let count = 0;
+      while (true) {
+        count += 1;
+        const targetX = x + direction[0] * count;
+        const targetY = y + direction[1] * count;
+        if (
+          boardToNum[targetY] === undefined ||
+          boardToNum[targetX] === undefined ||
+          boardToNum[targetY][targetX] <= 0
+        ) {
+          count = 0;
+          break;
+        } else if (boardToNum[targetY][targetX] === turnColor) {
+          count -= 1;
+          break;
         }
       }
-    }
-    setBoard(newcountboard);
-  };
+      return count;
+    },
+    [turnColor],
+  );
 
-  const Inversionprocessing = (
-    x: number,
-    y: number,
-    count: number,
-    direction: number[],
-    newBoard: number[][],
-  ) => {
-    for (let n: number = 1; n <= count; n++) {
-      newBoard[y + direction[1] * n][x + direction[0] * n] = turnColor;
-    }
-  };
-
-  const inversionCount = (x: number, y: number, direction: number[]) => {
-    let count = 0;
-    while (true) {
-      count += 1;
-      const targetX = x + direction[0] * count;
-      const targetY = y + direction[1] * count;
-      if (
-        board[targetY] === undefined ||
-        board[targetX] === undefined ||
-        board[targetY][targetX] <= 0
-      ) {
-        count = 0;
-        break;
-      } else if (board[targetY][targetX] === turnColor) {
-        count -= 1;
-        break;
+  const MarkCanPut = useCallback(
+    (boardToMark: number[][]) => {
+      const newcountboard = structuredClone(boardToMark);
+      let allcount = 0;
+      for (let y: number = 0; y < 8; y++) {
+        for (let x: number = 0; x < 8; x++) {
+          allcount = 0;
+          if (boardToMark[y][x] <= 0) {
+            for (let i: number = 0; i < 8; i++) {
+              allcount += inversionCount(x, y, direction_lst[i], boardToMark);
+            }
+            newcountboard[y][x] = -allcount;
+          }
+        }
       }
-    }
-    return count;
-  };
+      return newcountboard;
+    },
+    [inversionCount, direction_lst],
+  );
 
-  const increassStoneNum = (count: number) => {
-    const black = stornsNum[0];
-    const white = stornsNum[1];
-    if (turnColor === 1) {
-      setstornsNum([black + count + 1, white - count]);
-    } else {
-      setstornsNum([black - count, white + count + 1]);
-    }
-  };
+  const Inversionprocessing = useCallback(
+    (
+      x: number,
+      y: number,
+      count: number,
+      direction: number[],
+      newBoard: number[][],
+      color: number,
+    ) => {
+      for (let n: number = 1; n <= count; n++) {
+        newBoard[y + direction[1] * n][x + direction[0] * n] = color;
+      }
+    },
+    [],
+  );
+
+  const increaseStoneNum = useCallback((count: number, color: number) => {
+    setstonesNum(([black, white]) => {
+      if (color === 1) {
+        return [black + count + 1, white - count];
+      } else {
+        return [black - count, white + count + 1];
+      }
+    });
+  }, []);
 
   const clickHandler = (x: number, y: number) => {
     const newBoard = structuredClone(board);
@@ -97,28 +110,28 @@ const Home = () => {
     let allcount = 0;
 
     for (let i: number = 0; i < 8; i++) {
-      const count = inversionCount(x, y, direction_lst[i]);
+      const count = inversionCount(x, y, direction_lst[i], board);
       allcount += count;
       count_lst.push(count);
     }
 
     if (board[y][x] <= 0 && allcount > 0) {
-      increassStoneNum(allcount);
+      increaseStoneNum(allcount, turnColor);
       newBoard[y][x] = turnColor;
       for (let i: number = 0; i < 8; i++) {
         if (count_lst[i] > 0) {
-          Inversionprocessing(x, y, count_lst[i], direction_lst[i], newBoard);
+          Inversionprocessing(x, y, count_lst[i], direction_lst[i], newBoard, turnColor);
         }
       }
       setTurnColor(2 / turnColor);
-      setTrunNum(turn + 1);
+      setTurnNum(turn + 1);
     }
     setBoard(newBoard);
   };
 
   useEffect(() => {
-    MarkCanPut();
-  }, [turn]);
+    setBoard((prev) => MarkCanPut(prev));
+  }, [turn, MarkCanPut]);
 
   return (
     <div className={styles.container}>
