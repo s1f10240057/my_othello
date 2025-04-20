@@ -6,8 +6,7 @@ import styles from './page.module.css';
 // fawfe
 const Home = () => {
   const [turnColor, setTurnColor] = useState(1);
-  const [black, setblack] = useState<number>(2);
-  const [white, setwhite] = useState<number>(2);
+  const [stornsNum, setstornNum] = useState([2, 2]);
   const [turn, setTrunNum] = useState<number>(0);
 
   const direction_lst = [
@@ -46,25 +45,8 @@ const Home = () => {
         }
       }
     }
-
     setBoard(newcountboard);
   };
-
-  // const CountStone = () => {
-  //   let black = 0;
-  //   let white = 0;
-  //   for (let x: number = 0; x < 8; x++) {
-  //     for (let y: number = 0; y < 8; y++) {
-  //       if (board[y][x] === 1) {
-  //         black += 1;
-  //       } else if (board[y][x] === 2) {
-  //         white += 1;
-  //       }
-  //     }
-  //   }
-  //   setblack(black);
-  //   setwhite(white);
-  // };
 
   const Inversionprocessing = (
     x: number,
@@ -79,12 +61,11 @@ const Home = () => {
   };
 
   const Inversioncount = (x: number, y: number, direction: number[]) => {
-    let n = 0;
     let count = 0;
     while (true) {
-      n += 1;
-      const targetX = x + direction[0] * n;
-      const targetY = y + direction[1] * n;
+      count += 1;
+      const targetX = x + direction[0] * count;
+      const targetY = y + direction[1] * count;
       if (
         board[targetY] === undefined ||
         board[targetX] === undefined ||
@@ -93,20 +74,20 @@ const Home = () => {
         count = 0;
         break;
       } else if (board[targetY][targetX] === turnColor) {
+        count -= 1;
         break;
       }
-      count += 1;
     }
     return count;
   };
 
   const increassStone = (count: number) => {
+    const black = stornsNum[0];
+    const white = stornsNum[1];
     if (turnColor === 1) {
-      setblack(black + count + 1);
-      setwhite(white - count);
+      setstornNum([black + count + 1, white - count]);
     } else {
-      setwhite(white + count + 1);
-      setblack(black - count);
+      setstornNum([black - count, white + count + 1]);
     }
   };
 
@@ -123,14 +104,12 @@ const Home = () => {
 
     if (board[y][x] <= 0 && allcount > 0) {
       increassStone(allcount);
-
       newBoard[y][x] = turnColor;
       for (let i: number = 0; i < 8; i++) {
         if (count_lst[i] > 0) {
           Inversionprocessing(x, y, count_lst[i], direction_lst[i], newBoard);
         }
       }
-
       setTurnColor(2 / turnColor);
       setTrunNum(turn + 1);
     }
@@ -157,7 +136,7 @@ const Home = () => {
         )}
         {
           <p>
-            黒:{black}白{white}ターン{turn}
+            黒:{stornsNum[0]}白{stornsNum[1]}ターン{turn}
           </p>
         }
       </div>
@@ -166,3 +145,19 @@ const Home = () => {
 };
 
 export default Home;
+
+// const CountStone = () => {
+//   let black = 0;
+//   let white = 0;
+//   for (let x: number = 0; x < 8; x++) {
+//     for (let y: number = 0; y < 8; y++) {
+//       if (board[y][x] === 1) {
+//         black += 1;
+//       } else if (board[y][x] === 2) {
+//         white += 1;
+//       }
+//     }
+//   }
+//   setblack(black);
+//   setwhite(white);
+// };
