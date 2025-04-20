@@ -9,16 +9,6 @@ const Home = () => {
   const [black, setblack] = useState<number>(2);
   const [white, setwhite] = useState<number>(2);
   const [turn, setTrunNum] = useState<number>(0);
-  const [CountBoard, setCount] = useState([
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-  ]);
 
   const direction_lst = [
     [1, 0], //右
@@ -43,30 +33,21 @@ const Home = () => {
   ]);
 
   const MarkCanPut = () => {
-    const newcountboard = [
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-    ];
+    const newcountboard = structuredClone(board);
     let allcount = 0;
     for (let y: number = 0; y < 8; y++) {
       for (let x: number = 0; x < 8; x++) {
         allcount = 0;
-        if (board[y][x] === 0) {
+        if (board[y][x] <= 0) {
           for (let i: number = 0; i < 8; i++) {
             allcount += Inversioncount(x, y, direction_lst[i]);
           }
-          newcountboard[y][x] = allcount;
+          newcountboard[y][x] = -allcount;
         }
       }
     }
 
-    setCount(newcountboard);
+    setBoard(newcountboard);
   };
 
   // const CountStone = () => {
@@ -92,21 +73,9 @@ const Home = () => {
     direction: number[],
     newBoard: number[][],
   ) => {
-    let newblack = black;
-    let newwhite = white;
     for (let n: number = 1; n <= count; n++) {
       newBoard[y + direction[1] * n][x + direction[0] * n] = turnColor;
     }
-    if (turnColor === 1) {
-      newblack += count + 1;
-      newwhite -= count;
-    } else {
-      newwhite += count + 1;
-      newblack -= count;
-    }
-    setblack(newblack);
-    setwhite(newwhite);
-    setBoard(newBoard);
   };
 
   const Inversioncount = (x: number, y: number, direction: number[]) => {
@@ -119,7 +88,7 @@ const Home = () => {
       if (
         board[targetY] === undefined ||
         board[targetX] === undefined ||
-        board[targetY][targetX] === 0
+        board[targetY][targetX] <= 0
       ) {
         count = 0;
         break;
@@ -129,6 +98,16 @@ const Home = () => {
       count += 1;
     }
     return count;
+  };
+
+  const increassStone = (count: number) => {
+    if (turnColor === 1) {
+      setblack(black + count + 1);
+      setwhite(white - count);
+    } else {
+      setwhite(white + count + 1);
+      setblack(black - count);
+    }
   };
 
   const clickHandler = (x: number, y: number) => {
@@ -142,13 +121,16 @@ const Home = () => {
       count_lst.push(count);
     }
 
-    if (board[y][x] === 0 && allcount !== 0) {
+    if (board[y][x] <= 0 && allcount > 0) {
+      increassStone(allcount);
+
       newBoard[y][x] = turnColor;
       for (let i: number = 0; i < 8; i++) {
-        if (count_lst[i] !== 0) {
+        if (count_lst[i] > 0) {
           Inversionprocessing(x, y, count_lst[i], direction_lst[i], newBoard);
         }
       }
+
       setTurnColor(2 / turnColor);
       setTrunNum(turn + 1);
     }
@@ -156,7 +138,6 @@ const Home = () => {
   };
 
   useEffect(() => {
-    // CountStone();
     MarkCanPut();
   }, [turn]);
 
@@ -166,16 +147,11 @@ const Home = () => {
         {board.map((row, y) =>
           row.map((color, x) => (
             <div className={styles.cell} key={`${x}-${y}`} onClick={() => clickHandler(x, y)}>
-              {color !== 0 && (
-                <div
-                  className={styles.stone}
-                  style={{ background: color === 1 ? `#000` : `#fff` }}
-                />
-              )}
+              {color === 1 && <div className={styles.stone} style={{ background: `#000` }} />}
 
-              {color === 0 && CountBoard[y][x] !== 0 && (
-                <div className={styles.num}>{CountBoard[y][x]}</div>
-              )}
+              {color === 2 && <div className={styles.stone} style={{ background: `#fff` }} />}
+
+              {color < 0 && <div className={styles.num}>{-board[y][x]}</div>}
             </div>
           )),
         )}
