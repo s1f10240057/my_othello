@@ -6,7 +6,7 @@ import styles from './page.module.css';
 // fawfe
 const Home = () => {
   const [turnColor, setTurnColor] = useState(1);
-  const [stornsNum, setstornNum] = useState([2, 2]);
+  const [stornsNum, setstornsNum] = useState([2, 2]);
   const [turn, setTrunNum] = useState<number>(0);
 
   const direction_lst = [
@@ -39,7 +39,7 @@ const Home = () => {
         allcount = 0;
         if (board[y][x] <= 0) {
           for (let i: number = 0; i < 8; i++) {
-            allcount += Inversioncount(x, y, direction_lst[i]);
+            allcount += inversionCount(x, y, direction_lst[i]);
           }
           newcountboard[y][x] = -allcount;
         }
@@ -60,7 +60,7 @@ const Home = () => {
     }
   };
 
-  const Inversioncount = (x: number, y: number, direction: number[]) => {
+  const inversionCount = (x: number, y: number, direction: number[]) => {
     let count = 0;
     while (true) {
       count += 1;
@@ -81,13 +81,13 @@ const Home = () => {
     return count;
   };
 
-  const increassStone = (count: number) => {
+  const increassStoneNum = (count: number) => {
     const black = stornsNum[0];
     const white = stornsNum[1];
     if (turnColor === 1) {
-      setstornNum([black + count + 1, white - count]);
+      setstornsNum([black + count + 1, white - count]);
     } else {
-      setstornNum([black - count, white + count + 1]);
+      setstornsNum([black - count, white + count + 1]);
     }
   };
 
@@ -97,13 +97,13 @@ const Home = () => {
     let allcount = 0;
 
     for (let i: number = 0; i < 8; i++) {
-      const count = Inversioncount(x, y, direction_lst[i]);
+      const count = inversionCount(x, y, direction_lst[i]);
       allcount += count;
       count_lst.push(count);
     }
 
     if (board[y][x] <= 0 && allcount > 0) {
-      increassStone(allcount);
+      increassStoneNum(allcount);
       newBoard[y][x] = turnColor;
       for (let i: number = 0; i < 8; i++) {
         if (count_lst[i] > 0) {
