@@ -35,8 +35,6 @@
 }
 
 .num {
-  position: relative;
-  top: 30px;
   display: inline-block;
   width: 56px;
   height: 56px;

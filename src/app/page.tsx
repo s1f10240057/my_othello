@@ -6,9 +6,9 @@ import styles from './page.module.css';
 // fawfe
 const Home = () => {
   const [turnColor, setTurnColor] = useState(1);
-  const [black, setblack] = useState<number>(0);
-  const [white, setwhite] = useState<number>(0);
-
+  const [black, setblack] = useState<number>(2);
+  const [white, setwhite] = useState<number>(2);
+  const [turn, setTrunNum] = useState<number>(0);
   const [CountBoard, setCount] = useState([
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
@@ -42,20 +42,6 @@ const Home = () => {
     [0, 0, 0, 0, 0, 0, 0, 0],
   ]);
 
-  // const CreateNewBoard = () => {
-  //   const newboard = [
-  //     [0, 0, 0, 0, 0, 0, 0, 0],
-  //     [0, 0, 0, 0, 0, 0, 0, 0],
-  //     [0, 0, 0, 0, 0, 0, 0, 0],
-  //     [0, 0, 0, 0, 0, 0, 0, 0],
-  //     [0, 0, 0, 0, 0, 0, 0, 0],
-  //     [0, 0, 0, 0, 0, 0, 0, 0],
-  //     [0, 0, 0, 0, 0, 0, 0, 0],
-  //     [0, 0, 0, 0, 0, 0, 0, 0],
-  //   ];
-  //   return newboard;
-  // };
-
   const MarkCanPut = () => {
     const newcountboard = [
       [0, 0, 0, 0, 0, 0, 0, 0],
@@ -75,34 +61,29 @@ const Home = () => {
           for (let i: number = 0; i < 8; i++) {
             allcount += Inversioncount(x, y, direction_lst[i]);
           }
-
-          if (allcount !== 0) {
-            console.log(allcount);
-          }
           newcountboard[y][x] = allcount;
         }
       }
     }
-    console.log(newcountboard);
+
     setCount(newcountboard);
   };
 
-  const CountStone = (board: number[][]) => {
-    let black = 0;
-    let white = 0;
-    for (let x: number = 0; x < 8; x++) {
-      for (let y: number = 0; y < 8; y++) {
-        if (board[y][x] === 1) {
-          black += 1;
-        } else if (board[y][x] === 2) {
-          white += 1;
-        }
-      }
-    }
-    console.log(`黒:${black}\n白${white}`);
-    setblack(black);
-    setwhite(white);
-  };
+  // const CountStone = () => {
+  //   let black = 0;
+  //   let white = 0;
+  //   for (let x: number = 0; x < 8; x++) {
+  //     for (let y: number = 0; y < 8; y++) {
+  //       if (board[y][x] === 1) {
+  //         black += 1;
+  //       } else if (board[y][x] === 2) {
+  //         white += 1;
+  //       }
+  //     }
+  //   }
+  //   setblack(black);
+  //   setwhite(white);
+  // };
 
   const Inversionprocessing = (
     x: number,
@@ -111,9 +92,20 @@ const Home = () => {
     direction: number[],
     newBoard: number[][],
   ) => {
+    let newblack = black;
+    let newwhite = white;
     for (let n: number = 1; n <= count; n++) {
       newBoard[y + direction[1] * n][x + direction[0] * n] = turnColor;
     }
+    if (turnColor === 1) {
+      newblack += count + 1;
+      newwhite -= count;
+    } else {
+      newwhite += count + 1;
+      newblack -= count;
+    }
+    setblack(newblack);
+    setwhite(newwhite);
     setBoard(newBoard);
   };
 
@@ -122,26 +114,27 @@ const Home = () => {
     let count = 0;
     while (true) {
       n += 1;
+      const targetX = x + direction[0] * n;
+      const targetY = y + direction[1] * n;
       if (
-        board[y + direction[1] * n] === undefined ||
-        board[x + direction[0] * n] === undefined ||
-        board[y + direction[1] * n][x + direction[0] * n] === 0
+        board[targetY] === undefined ||
+        board[targetX] === undefined ||
+        board[targetY][targetX] === 0
       ) {
         count = 0;
         break;
-      } else if (board[y + direction[1] * n][x + direction[0] * n] === turnColor) {
+      } else if (board[targetY][targetX] === turnColor) {
         break;
-      } else {
-        count += 1;
       }
+      count += 1;
     }
     return count;
   };
 
   const clickHandler = (x: number, y: number) => {
     const newBoard = structuredClone(board);
-    let allcount = 0;
     const count_lst = [];
+    let allcount = 0;
 
     for (let i: number = 0; i < 8; i++) {
       const count = Inversioncount(x, y, direction_lst[i]);
@@ -157,17 +150,15 @@ const Home = () => {
         }
       }
       setTurnColor(2 / turnColor);
+      setTrunNum(turn + 1);
     }
     setBoard(newBoard);
-    CountStone(newBoard);
-
-    console.log(CountBoard);
   };
 
   useEffect(() => {
-    CountStone(board);
+    // CountStone();
     MarkCanPut();
-  });
+  }, [turn]);
 
   return (
     <div className={styles.container}>
@@ -190,7 +181,7 @@ const Home = () => {
         )}
         {
           <p>
-            黒:{black}白{white}
+            黒:{black}白{white}ターン{turn}
           </p>
         }
       </div>
