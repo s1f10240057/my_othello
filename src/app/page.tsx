@@ -35,7 +35,7 @@ const Home = () => {
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 1, 2, 2, 2, 0],
+    [0, 0, 0, 1, 2, 0, 0, 0],
     [0, 0, 0, 2, 1, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
@@ -84,7 +84,7 @@ const Home = () => {
       }
     }
     console.log(newcountboard);
-    return newcountboard;
+    setCount(newcountboard);
   };
 
   const CountStone = (board: number[][]) => {
@@ -160,13 +160,13 @@ const Home = () => {
     }
     setBoard(newBoard);
     CountStone(newBoard);
-    const countb = MarkCanPut();
-    setCount(countb);
+
     console.log(CountBoard);
   };
 
   useEffect(() => {
     CountStone(board);
+    MarkCanPut();
   });
 
   return (
@@ -181,13 +181,16 @@ const Home = () => {
                   style={{ background: color === 1 ? `#000` : `#fff` }}
                 />
               )}
+
+              {color === 0 && CountBoard[y][x] !== 0 && (
+                <div className={styles.num}>{CountBoard[y][x]}</div>
+              )}
             </div>
           )),
         )}
         {
           <p>
             黒:{black}白{white}
-            {CountBoard}
           </p>
         }
       </div>
