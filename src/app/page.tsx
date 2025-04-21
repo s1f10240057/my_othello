@@ -6,8 +6,9 @@ import styles from './page.module.css';
 // fawfe
 const Home = () => {
   const [turnColor, setTurnColor] = useState(1);
-  const [stornsNum, setstonesNum] = useState([2, 1]);
+  const [stonesNum, setstonesNum] = useState([2, 2]);
   const [turn, setTurnNum] = useState<number>(0);
+  const [comPuted, setcomPuted] = useState([-1, -1]);
 
   const direction_lst = useMemo(
     () => [
@@ -28,7 +29,7 @@ const Home = () => {
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 1, 2, 0, 0, 0],
-    [0, 0, 0, 1, 1, 0, 0, 0],
+    [0, 0, 0, 2, 1, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
@@ -78,23 +79,37 @@ const Home = () => {
     [inversionCount, direction_lst],
   );
 
-  const checkFinish = useCallback((checkToBoard: number[][], stonesNum: number[]) => {
-    console.log();
-    if (stonesNum[0] === 0 || stonesNum[1] === 0) {
-      return true;
+  const whoWin = useCallback((stonesNum: number[]) => {
+    if (stonesNum[0] > stonesNum[1]) {
+      console.log('黒の勝利!!!');
+    } else if (stonesNum[1] > stonesNum[0]) {
+      console.log('白の勝利!!!');
+    } else {
+      console.log('引き分け');
     }
-    for (let y: number = 0; y < 8; y++) {
-      for (let x: number = 0; x < 8; x++) {
-        if (checkToBoard[y][x] < 0) {
-          console.log(checkToBoard);
-          console.log('続き');
-          return false;
+  }, []);
+
+  const checkFinish = useCallback(
+    (checkToBoard: number[][], stonesNum: number[]) => {
+      console.log();
+      if (stonesNum[0] === 0 || stonesNum[1] === 0) {
+        return true;
+      }
+      for (let y: number = 0; y < 8; y++) {
+        for (let x: number = 0; x < 8; x++) {
+          if (checkToBoard[y][x] < 0) {
+            console.log(checkToBoard);
+            console.log('続き');
+            return false;
+          }
         }
       }
-    }
-    console.log('終了');
-    return true;
-  }, []);
+      console.log('終了');
+      whoWin(stonesNum);
+      return true;
+    },
+    [whoWin],
+  );
 
   const Inversionprocessing = useCallback(
     (
@@ -123,7 +138,7 @@ const Home = () => {
   }, []);
 
   const decidePutCom = useCallback((boardToDecide: number[][]) => {
-    const biggest = [0, 0, 0];
+    const biggest = [-1, 0, 0];
     for (let y: number = 0; y < 8; y++) {
       for (let x: number = 0; x < 8; x++) {
         if (biggest[0] < -boardToDecide[y][x]) {
@@ -175,11 +190,14 @@ const Home = () => {
       const ePut = decidePutCom(newBoard);
       const ex = ePut[1];
       const ey = ePut[2];
+
       const color = 2;
       console.log(ePut);
-      if (ex <= 0) {
+      if (ex < 0 || ey < 0) {
+        setcomPuted([-1, -1]);
         return newBoard;
       }
+      setcomPuted([ePut[1], ePut[2]]);
 
       const count_lst = searchCount(ex, ey, direction_lst, newBoard, color);
       const allcount = count_lst.reduce((acc, value) => acc + value, 0);
@@ -208,12 +226,14 @@ const Home = () => {
       totalPutProseccing(x, y, count_lst, allcount, direction_lst, newBoard, turnColor);
       setTurnNum((prev) => prev + 1);
       const endboard = comTurnProcessing(newBoard);
-      checkFinish(endboard, stornsNum);
+      checkFinish(endboard, stonesNum);
     }
   };
 
   useEffect(() => {
     setBoard((prev) => MarkCanPut(prev, (turn % 2) + 1));
+    console.log(comPuted);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [turn, MarkCanPut]);
 
   return (
@@ -227,12 +247,14 @@ const Home = () => {
               {color === 2 && <div className={styles.stone} style={{ background: `#fff` }} />}
 
               {color < 0 && <div className={styles.num}>{-board[y][x]}</div>}
+
+              {x === comPuted[0] && y === comPuted[1] && <div className={styles.puted}>a</div>}
             </div>
           )),
         )}
         {
           <p>
-            黒:{stornsNum[0]}白{stornsNum[1]}ターン{turn}
+            黒:{stonesNum[0]}白{stonesNum[1]}ターン{turn}
           </p>
         }
       </div>
