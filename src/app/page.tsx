@@ -104,27 +104,69 @@ const Home = () => {
     });
   }, []);
 
+  const decidePutCom = useCallback((boardToDecide: number[][]) => {
+    const biggest = [-1, 0, 0];
+    for (let y: number = 0; y < 8; y++) {
+      for (let x: number = 0; x < 8; x++) {
+        if (biggest[0] < -boardToDecide[y][x]) {
+          biggest[0] = -boardToDecide[y][x];
+          biggest[1] = x;
+          biggest[2] = y;
+        }
+      }
+    }
+    return biggest;
+  }, []);
+
   const clickHandler = (x: number, y: number) => {
     const newBoard = structuredClone(board);
     const count_lst = [];
     let allcount = 0;
+    if (turn % 2 === 0) {
+      for (let i: number = 0; i < 8; i++) {
+        const count = inversionCount(x, y, direction_lst[i], board);
+        allcount += count;
+        count_lst.push(count);
+      }
 
-    for (let i: number = 0; i < 8; i++) {
-      const count = inversionCount(x, y, direction_lst[i], board);
-      allcount += count;
-      count_lst.push(count);
-    }
+      if (board[y][x] <= 0 && allcount > 0) {
+        increaseStoneNum(allcount, turnColor);
+        newBoard[y][x] = turnColor;
+        for (let i: number = 0; i < 8; i++) {
+          if (count_lst[i] > 0) {
+            Inversionprocessing(x, y, count_lst[i], direction_lst[i], newBoard, turnColor);
+          }
+        }
+        setTurnColor(2 / turnColor);
+        setTurnNum(turn + 1);
+        setBoard(newBoard);
 
-    if (board[y][x] <= 0 && allcount > 0) {
+        console.log(turnColor);
+      }
+    } else {
+      // 敵のターン
+      const ePut = decidePutCom(board);
+      const ex = ePut[1];
+      const ey = ePut[2];
+
+      console.log(ex, ey);
+
+      for (let i: number = 0; i < 8; i++) {
+        const count = inversionCount(ex, ey, direction_lst[i], board);
+        allcount += count;
+        count_lst.push(count);
+      }
+
       increaseStoneNum(allcount, turnColor);
-      newBoard[y][x] = turnColor;
+      newBoard[ey][ex] = turnColor;
       for (let i: number = 0; i < 8; i++) {
         if (count_lst[i] > 0) {
-          Inversionprocessing(x, y, count_lst[i], direction_lst[i], newBoard, turnColor);
+          Inversionprocessing(ex, ey, count_lst[i], direction_lst[i], newBoard, turnColor);
         }
       }
       setTurnColor(2 / turnColor);
       setTurnNum(turn + 1);
+      setBoard(newBoard);
     }
     setBoard(newBoard);
   };
