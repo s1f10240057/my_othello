@@ -118,73 +118,73 @@ const Home = () => {
     return biggest;
   }, []);
 
+  const searchCount = useCallback(
+    (x: number, y: number, direction_lst: number[][], board: number[][], turnColor: number) => {
+      const count_lst = [];
+      for (let i: number = 0; i < 8; i++) {
+        const count = inversionCount(x, y, direction_lst[i], board, turnColor);
+        count_lst.push(count);
+      }
+      return count_lst;
+    },
+    [inversionCount],
+  );
+
+  const totalPutProseccing = useCallback(
+    (
+      x: number,
+      y: number,
+      count_lst: number[],
+      allcount: number,
+      direction_lst: number[][],
+      newBoard: number[][],
+      color: number,
+    ) => {
+      increaseStoneNum(allcount, color);
+      newBoard[y][x] = color;
+      for (let i: number = 0; i < 8; i++) {
+        if (count_lst[i] > 0) {
+          Inversionprocessing(x, y, count_lst[i], direction_lst[i], newBoard, color);
+        }
+      }
+    },
+    [increaseStoneNum, Inversionprocessing],
+  );
+
   const putComProcessing = useCallback(
-    (ToBoard: number[][], turn: number) => {
+    (ToBoard: number[][]) => {
       const newBoard = structuredClone(ToBoard);
-      let allcount = 0;
       const ePut = decidePutCom(newBoard);
       const ex = ePut[1];
       const ey = ePut[2];
-      const count_lst = [];
       const color = 2;
 
-      console.log(ex, ey);
+      const count_lst = searchCount(ex, ey, direction_lst, newBoard, color);
+      const allcount = count_lst.reduce((acc, value) => acc + value, 0);
 
-      for (let i: number = 0; i < 8; i++) {
-        const count = inversionCount(ex, ey, direction_lst[i], newBoard, color);
-        allcount += count;
-        count_lst.push(count);
-      }
-
-      increaseStoneNum(allcount, color);
-      newBoard[ey][ex] = color;
-
-      for (let i: number = 0; i < 8; i++) {
-        if (count_lst[i] > 0) {
-          Inversionprocessing(ex, ey, count_lst[i], direction_lst[i], newBoard, color);
-        }
-      }
+      totalPutProseccing(ex, ey, count_lst, allcount, direction_lst, newBoard, color);
       setTurnColor(2 / color);
-      console.log(newBoard);
-      setBoard(newBoard);
-      setTurnNum(turn + 1);
+      return newBoard;
     },
-    [Inversionprocessing, direction_lst, increaseStoneNum, decidePutCom, inversionCount],
+    [direction_lst, decidePutCom, searchCount, totalPutProseccing],
   );
+
+  const comTurnProcessing = (newBoard: number[][]) => {
+    const markedBoard = MarkCanPut(newBoard, 2);
+    const comPutedBoard = putComProcessing(markedBoard);
+    setBoard(comPutedBoard);
+    setTurnNum((prev) => prev + 1);
+  };
 
   const clickHandler = (x: number, y: number) => {
     const newBoard = structuredClone(board);
-    const count_lst = [];
-    let allcount = 0;
-    if (turn % 2 === 0) {
-      for (let i: number = 0; i < 8; i++) {
-        const count = inversionCount(x, y, direction_lst[i], board, turnColor);
-        allcount += count;
-        count_lst.push(count);
-      }
+    const count_lst = searchCount(x, y, direction_lst, newBoard, turnColor);
+    const allcount = count_lst.reduce((acc, value) => acc + value, 0);
 
-      if (board[y][x] <= 0 && allcount > 0) {
-        increaseStoneNum(allcount, turnColor);
-        newBoard[y][x] = turnColor;
-        for (let i: number = 0; i < 8; i++) {
-          if (count_lst[i] > 0) {
-            Inversionprocessing(x, y, count_lst[i], direction_lst[i], newBoard, turnColor);
-          }
-        }
-        setTurnColor((prev) => 2 / prev);
-        setTurnNum((prev) => prev + 1);
-        setBoard(newBoard);
-
-        console.log(turnColor);
-
-        setBoard((prev) => MarkCanPut(prev, 2));
-        const newBoard2 = MarkCanPut(newBoard, 2);
-        putComProcessing(newBoard2, turn + 1);
-      }
-    } else {
-      // 敵のターン
-      // putComProcessing(board, turn);
-      console.log('敵のターン');
+    if (newBoard[y][x] <= 0 && allcount > 0) {
+      totalPutProseccing(x, y, count_lst, allcount, direction_lst, newBoard, turnColor);
+      setTurnNum((prev) => prev + 1);
+      comTurnProcessing(newBoard);
     }
   };
 
