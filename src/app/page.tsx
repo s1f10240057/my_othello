@@ -6,7 +6,7 @@ import styles from './page.module.css';
 // fawfe
 const Home = () => {
   const [turnColor, setTurnColor] = useState(1);
-  const [stornsNum, setstonesNum] = useState([2, 2]);
+  const [stornsNum, setstonesNum] = useState([2, 1]);
   const [turn, setTurnNum] = useState<number>(0);
 
   const direction_lst = useMemo(
@@ -28,7 +28,7 @@ const Home = () => {
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 1, 2, 0, 0, 0],
-    [0, 0, 0, 2, 1, 0, 0, 0],
+    [0, 0, 0, 1, 1, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
@@ -78,6 +78,24 @@ const Home = () => {
     [inversionCount, direction_lst],
   );
 
+  const checkFinish = useCallback((checkToBoard: number[][], stonesNum: number[]) => {
+    console.log();
+    if (stonesNum[0] === 0 || stonesNum[1] === 0) {
+      return true;
+    }
+    for (let y: number = 0; y < 8; y++) {
+      for (let x: number = 0; x < 8; x++) {
+        if (checkToBoard[y][x] < 0) {
+          console.log(checkToBoard);
+          console.log('続き');
+          return false;
+        }
+      }
+    }
+    console.log('終了');
+    return true;
+  }, []);
+
   const Inversionprocessing = useCallback(
     (
       x: number,
@@ -105,7 +123,7 @@ const Home = () => {
   }, []);
 
   const decidePutCom = useCallback((boardToDecide: number[][]) => {
-    const biggest = [-1, 0, 0];
+    const biggest = [0, 0, 0];
     for (let y: number = 0; y < 8; y++) {
       for (let x: number = 0; x < 8; x++) {
         if (biggest[0] < -boardToDecide[y][x]) {
@@ -158,6 +176,10 @@ const Home = () => {
       const ex = ePut[1];
       const ey = ePut[2];
       const color = 2;
+      console.log(ePut);
+      if (ex <= 0) {
+        return newBoard;
+      }
 
       const count_lst = searchCount(ex, ey, direction_lst, newBoard, color);
       const allcount = count_lst.reduce((acc, value) => acc + value, 0);
@@ -174,6 +196,7 @@ const Home = () => {
     const comPutedBoard = putComProcessing(markedBoard);
     setBoard(comPutedBoard);
     setTurnNum((prev) => prev + 1);
+    return comPutedBoard;
   };
 
   const clickHandler = (x: number, y: number) => {
@@ -184,7 +207,8 @@ const Home = () => {
     if (newBoard[y][x] <= 0 && allcount > 0) {
       totalPutProseccing(x, y, count_lst, allcount, direction_lst, newBoard, turnColor);
       setTurnNum((prev) => prev + 1);
-      comTurnProcessing(newBoard);
+      const endboard = comTurnProcessing(newBoard);
+      checkFinish(endboard, stornsNum);
     }
   };
 
