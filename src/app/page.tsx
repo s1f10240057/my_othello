@@ -87,29 +87,27 @@ const Home = () => {
     } else {
       console.log('引き分け');
     }
+    console.log(stonesNum[0], stonesNum[1]);
   }, []);
 
-  const checkFinish = useCallback(
-    (checkToBoard: number[][], stonesNum: number[]) => {
-      console.log();
-      if (stonesNum[0] === 0 || stonesNum[1] === 0) {
-        return true;
-      }
-      for (let y: number = 0; y < 8; y++) {
-        for (let x: number = 0; x < 8; x++) {
-          if (checkToBoard[y][x] < 0) {
-            console.log(checkToBoard);
-            console.log('続き');
-            return false;
-          }
+  const checkFinish = useCallback((checkToBoard: number[][], stonesNum: number[]) => {
+    console.log();
+    if (stonesNum[0] === 0 || stonesNum[1] === 0) {
+      return true;
+    }
+    for (let y: number = 0; y < 8; y++) {
+      for (let x: number = 0; x < 8; x++) {
+        if (checkToBoard[y][x] < 0) {
+          console.log(checkToBoard);
+          console.log('続き');
+          return false;
         }
       }
-      console.log('終了');
-      whoWin(stonesNum);
-      return true;
-    },
-    [whoWin],
-  );
+    }
+    console.log('終了');
+
+    return true;
+  }, []);
 
   const Inversionprocessing = useCallback(
     (
@@ -226,15 +224,18 @@ const Home = () => {
       totalPutProseccing(x, y, count_lst, allcount, direction_lst, newBoard, turnColor);
       setTurnNum((prev) => prev + 1);
       const endboard = comTurnProcessing(newBoard);
-      checkFinish(endboard, stonesNum);
+      setBoard(endboard);
     }
   };
 
   useEffect(() => {
     setBoard((prev) => MarkCanPut(prev, (turn % 2) + 1));
-    console.log(comPuted);
+    console.log(stonesNum[0], stonesNum[1]);
+    if (checkFinish(board, stonesNum)) {
+      whoWin(stonesNum);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [turn, MarkCanPut]);
+  }, [turn, MarkCanPut, whoWin]);
 
   return (
     <div className={styles.container}>
