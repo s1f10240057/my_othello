@@ -35,7 +35,7 @@ const Home = () => {
   ]);
 
   const inversionCount = useCallback(
-    (x: number, y: number, direction: number[], boardToNum: number[][]) => {
+    (x: number, y: number, direction: number[], boardToNum: number[][], color: number) => {
       let count = 0;
       while (true) {
         count += 1;
@@ -48,18 +48,18 @@ const Home = () => {
         ) {
           count = 0;
           break;
-        } else if (boardToNum[targetY][targetX] === turnColor) {
+        } else if (boardToNum[targetY][targetX] === color) {
           count -= 1;
           break;
         }
       }
       return count;
     },
-    [turnColor],
+    [],
   );
 
   const MarkCanPut = useCallback(
-    (boardToMark: number[][]) => {
+    (boardToMark: number[][], color: number) => {
       const newcountboard = structuredClone(boardToMark);
       let allcount = 0;
       for (let y: number = 0; y < 8; y++) {
@@ -67,7 +67,7 @@ const Home = () => {
           allcount = 0;
           if (boardToMark[y][x] <= 0) {
             for (let i: number = 0; i < 8; i++) {
-              allcount += inversionCount(x, y, direction_lst[i], boardToMark);
+              allcount += inversionCount(x, y, direction_lst[i], boardToMark, color);
             }
             newcountboard[y][x] = -allcount;
           }
@@ -118,13 +118,47 @@ const Home = () => {
     return biggest;
   }, []);
 
+  const putComProcessing = useCallback(
+    (ToBoard: number[][], turn: number) => {
+      const newBoard = structuredClone(ToBoard);
+      let allcount = 0;
+      const ePut = decidePutCom(newBoard);
+      const ex = ePut[1];
+      const ey = ePut[2];
+      const count_lst = [];
+      const color = 2;
+
+      console.log(ex, ey);
+
+      for (let i: number = 0; i < 8; i++) {
+        const count = inversionCount(ex, ey, direction_lst[i], newBoard, color);
+        allcount += count;
+        count_lst.push(count);
+      }
+
+      increaseStoneNum(allcount, color);
+      newBoard[ey][ex] = color;
+
+      for (let i: number = 0; i < 8; i++) {
+        if (count_lst[i] > 0) {
+          Inversionprocessing(ex, ey, count_lst[i], direction_lst[i], newBoard, color);
+        }
+      }
+      setTurnColor(2 / color);
+      console.log(newBoard);
+      setBoard(newBoard);
+      setTurnNum(turn + 1);
+    },
+    [Inversionprocessing, direction_lst, increaseStoneNum, decidePutCom, inversionCount],
+  );
+
   const clickHandler = (x: number, y: number) => {
     const newBoard = structuredClone(board);
     const count_lst = [];
     let allcount = 0;
     if (turn % 2 === 0) {
       for (let i: number = 0; i < 8; i++) {
-        const count = inversionCount(x, y, direction_lst[i], board);
+        const count = inversionCount(x, y, direction_lst[i], board, turnColor);
         allcount += count;
         count_lst.push(count);
       }
@@ -137,42 +171,25 @@ const Home = () => {
             Inversionprocessing(x, y, count_lst[i], direction_lst[i], newBoard, turnColor);
           }
         }
-        setTurnColor(2 / turnColor);
-        setTurnNum(turn + 1);
+        setTurnColor((prev) => 2 / prev);
+        setTurnNum((prev) => prev + 1);
         setBoard(newBoard);
 
         console.log(turnColor);
+
+        setBoard((prev) => MarkCanPut(prev, 2));
+        const newBoard2 = MarkCanPut(newBoard, 2);
+        putComProcessing(newBoard2, turn + 1);
       }
     } else {
       // 敵のターン
-      const ePut = decidePutCom(board);
-      const ex = ePut[1];
-      const ey = ePut[2];
-
-      console.log(ex, ey);
-
-      for (let i: number = 0; i < 8; i++) {
-        const count = inversionCount(ex, ey, direction_lst[i], board);
-        allcount += count;
-        count_lst.push(count);
-      }
-
-      increaseStoneNum(allcount, turnColor);
-      newBoard[ey][ex] = turnColor;
-      for (let i: number = 0; i < 8; i++) {
-        if (count_lst[i] > 0) {
-          Inversionprocessing(ex, ey, count_lst[i], direction_lst[i], newBoard, turnColor);
-        }
-      }
-      setTurnColor(2 / turnColor);
-      setTurnNum(turn + 1);
-      setBoard(newBoard);
+      // putComProcessing(board, turn);
+      console.log('敵のターン');
     }
-    setBoard(newBoard);
   };
 
   useEffect(() => {
-    setBoard((prev) => MarkCanPut(prev));
+    setBoard((prev) => MarkCanPut(prev, (turn % 2) + 1));
   }, [turn, MarkCanPut]);
 
   return (
