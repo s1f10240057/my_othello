@@ -9,6 +9,8 @@ const Home = () => {
   const [stonesNum, setstonesNum] = useState([2, 2]);
   const [turn, setTurnNum] = useState<number>(1);
   const [comPuted, setcomPuted] = useState([-1, -1]);
+  const [comPassCount, setcomPassCount] = useState<number>(0);
+  const [userPassCount, setuserPassCount] = useState<number>(0);
 
   const direction_lst = useMemo(
     () => [
@@ -91,20 +93,19 @@ const Home = () => {
   }, []);
 
   const checkFinish = useCallback((checkToBoard: number[][], stonesNum: number[]) => {
-    console.log();
     if (stonesNum[0] === 0 || stonesNum[1] === 0) {
+      console.log('終了');
       return true;
     }
     for (let y: number = 0; y < 8; y++) {
       for (let x: number = 0; x < 8; x++) {
         if (checkToBoard[y][x] < 0) {
-          console.log(checkToBoard);
           console.log('続き');
           return false;
         }
       }
     }
-
+    console.log(checkToBoard);
     return true;
   }, []);
 
@@ -190,9 +191,13 @@ const Home = () => {
 
       const color = 2;
       console.log(ePut);
-      if (ex < 0 || ey < 0) {
+      if (ex <= 0 || ey <= 0) {
         setcomPuted([-1, -1]);
+        console.log('パスしました');
+        setcomPassCount((prev) => prev + 1);
         return newBoard;
+      } else {
+        setcomPassCount(0);
       }
       setcomPuted([ePut[1], ePut[2]]);
 
@@ -214,8 +219,26 @@ const Home = () => {
     return comPutedBoard;
   };
 
+  const userPassjudge = useCallback((passToboard: number[][]) => {
+    for (let x: number = 0; x < 8; x++) {
+      for (let y: number = 0; y < 8; y++) {
+        if (passToboard[y][x] < 0) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }, []);
+
   const clickHandler = (x: number, y: number) => {
     const newBoard = structuredClone(board);
+    if (userPassjudge(board)) {
+      setuserPassCount((prev) => prev + 1);
+      console.log('userがパスしました');
+    } else {
+      setcomPassCount(0);
+    }
+
     const count_lst = searchCount(x, y, direction_lst, newBoard, turnColor);
     const allcount = count_lst.reduce((acc, value) => acc + value, 0);
 
@@ -228,9 +251,16 @@ const Home = () => {
   };
 
   useEffect(() => {
-    setBoard((prev) => MarkCanPut(prev, turn % 2));
+    const markedboard = MarkCanPut(board, turn % 2);
+    setBoard(markedboard);
     console.log(stonesNum[0], stonesNum[1]);
-    if (checkFinish(board, stonesNum) && turn !== 1) {
+    console.log(`${turn}ターン目`);
+    console.log(markedboard);
+    if (
+      (checkFinish(markedboard, stonesNum) && turn !== 1) ||
+      comPassCount >= 2 ||
+      userPassCount >= 2
+    ) {
       whoWin(stonesNum);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
