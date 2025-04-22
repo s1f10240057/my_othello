@@ -267,7 +267,11 @@ const Home = () => {
 
               {color === 2 && <div className={styles.stone} style={{ background: `#fff` }} />}
 
-              {color < 0 && <div className={styles.num}>{-board[y][x]}</div>}
+              {color < 0 && (
+                <div className={styles.numBox}>
+                  <span className={styles.num}>{-board[y][x]}</span>
+                </div>
+              )}
 
               {x === comPuted[0] && y === comPuted[1] && <div className={styles.puted}>a</div>}
             </div>
