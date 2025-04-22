@@ -137,8 +137,6 @@ const Home = () => {
 
   const decidePutCom = useCallback((boardToDecide: number[][]) => {
     const biggest = [-1, 0, 0];
-    console.log(boardToDecide);
-    console.log(turnColor);
     for (let y: number = 0; y < 8; y++) {
       for (let x: number = 0; x < 8; x++) {
         if (biggest[0] < -boardToDecide[y][x]) {
