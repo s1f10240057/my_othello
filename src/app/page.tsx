@@ -89,18 +89,15 @@ const Home = () => {
     } else {
       console.log('引き分け');
     }
-    console.log(stonesNum[0], stonesNum[1]);
   }, []);
 
   const checkFinish = useCallback((checkToBoard: number[][], stonesNum: number[]) => {
     if (stonesNum[0] === 0 || stonesNum[1] === 0) {
-      console.log('終了');
       return true;
     }
     for (let y: number = 0; y < 8; y++) {
       for (let x: number = 0; x < 8; x++) {
         if (checkToBoard[y][x] < 0) {
-          console.log('続き');
           return false;
         }
       }
@@ -136,13 +133,11 @@ const Home = () => {
   }, []);
 
   const decidePutCom = useCallback((boardToDecide: number[][]) => {
-    const biggest = [-1, 0, 0];
+    let biggest = [-1, 0, 0];
     for (let y: number = 0; y < 8; y++) {
       for (let x: number = 0; x < 8; x++) {
         if (biggest[0] < -boardToDecide[y][x]) {
-          biggest[0] = -boardToDecide[y][x];
-          biggest[1] = x;
-          biggest[2] = y;
+          biggest = [-boardToDecide[y][x], x, y];
         }
       }
     }
@@ -188,10 +183,9 @@ const Home = () => {
       const ePut = decidePutCom(newBoard);
       const ex = ePut[1];
       const ey = ePut[2];
-
       const color = 2;
       console.log(ePut);
-      if (ePut[0] === 0) {
+      if (ePut[0] <= 0) {
         setcomPuted([-1, -1]);
         console.log('パスしました');
         setcomPassCount((prev) => prev + 1);
@@ -212,8 +206,7 @@ const Home = () => {
   );
 
   const comTurnProcessing = (newBoard: number[][]) => {
-    const markedBoard = MarkCanPut(newBoard, 2);
-    const comPutedBoard = putComProcessing(markedBoard);
+    const comPutedBoard = putComProcessing(MarkCanPut(newBoard, 2));
     setBoard(comPutedBoard);
     setTurnNum((prev) => prev + 1);
     return comPutedBoard;
@@ -245,8 +238,7 @@ const Home = () => {
     if (newBoard[y][x] <= 0 && allcount > 0) {
       totalPutProseccing(x, y, count_lst, allcount, direction_lst, newBoard, turnColor);
       setTurnNum((prev) => prev + 1);
-      const endboard = comTurnProcessing(newBoard);
-      setBoard(endboard);
+      setBoard(comTurnProcessing(newBoard));
     }
   };
 

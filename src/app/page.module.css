@@ -11,24 +11,23 @@
 .board {
   display: flex;
   flex-wrap: wrap;
-  width: 640px;
-  height: 640px;
+  width: 40vw;
+  height: 40vw;
   line-height: 0;
   background-color: rgb(153 250 153);
 }
 
 .cell {
-  justify-content: center;
-  width: 80px;
-  height: 80px;
+  width: 12.5%;
+  height: 12.5%;
   text-align: center;
   border: 1px solid black;
 }
 
 .stone {
-  width: 56px;
-  height: 56px;
-  margin: 12px;
+  width: 70%;
+  height: 70%;
+  margin: 17.5%;
   background-color: white;
   border: 1px solid black;
   border-radius: 50%;
@@ -36,9 +35,9 @@
 
 .num {
   display: inline-block;
-  width: 56px;
-  height: 56px;
-  margin: 12px;
+  width: 70%;
+  height: 70%;
+  margin: 17.5%;
 }
 
 .puted {
