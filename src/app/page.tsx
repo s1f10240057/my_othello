@@ -7,7 +7,7 @@ import styles from './page.module.css';
 const Home = () => {
   const [turnColor, setTurnColor] = useState(1);
   const [stonesNum, setstonesNum] = useState([2, 2]);
-  const [turn, setTurnNum] = useState<number>(0);
+  const [turn, setTurnNum] = useState<number>(1);
   const [comPuted, setcomPuted] = useState([-1, -1]);
 
   const direction_lst = useMemo(
@@ -104,7 +104,6 @@ const Home = () => {
         }
       }
     }
-    console.log('終了');
 
     return true;
   }, []);
@@ -229,9 +228,9 @@ const Home = () => {
   };
 
   useEffect(() => {
-    setBoard((prev) => MarkCanPut(prev, (turn % 2) + 1));
+    setBoard((prev) => MarkCanPut(prev, turn % 2));
     console.log(stonesNum[0], stonesNum[1]);
-    if (checkFinish(board, stonesNum)) {
+    if (checkFinish(board, stonesNum) && turn !== 1) {
       whoWin(stonesNum);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
