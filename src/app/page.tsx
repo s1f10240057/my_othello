@@ -137,6 +137,8 @@ const Home = () => {
 
   const decidePutCom = useCallback((boardToDecide: number[][]) => {
     const biggest = [-1, 0, 0];
+    console.log(boardToDecide);
+    console.log(turnColor);
     for (let y: number = 0; y < 8; y++) {
       for (let x: number = 0; x < 8; x++) {
         if (biggest[0] < -boardToDecide[y][x]) {
@@ -191,7 +193,7 @@ const Home = () => {
 
       const color = 2;
       console.log(ePut);
-      if (ex <= 0 || ey <= 0) {
+      if (ePut[0] === 0) {
         setcomPuted([-1, -1]);
         console.log('パスしました');
         setcomPassCount((prev) => prev + 1);
@@ -255,7 +257,6 @@ const Home = () => {
     setBoard(markedboard);
     console.log(stonesNum[0], stonesNum[1]);
     console.log(`${turn}ターン目`);
-    console.log(markedboard);
     if (
       (checkFinish(markedboard, stonesNum) && turn !== 1) ||
       comPassCount >= 2 ||
