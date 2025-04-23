@@ -6,7 +6,7 @@
   height: 100vh;
   min-height: 100vh;
   padding: 0 0.5rem;
-  background-color: rgb(222 242 247);
+  background-color: #090834;
 }
 
 .board {
@@ -53,6 +53,9 @@
 }
 
 .cell {
+  /* display: flex;
+  align-items: center;
+  justify-content: center; */
   width: 12.5%;
   height: 12.5%;
   background-color: rgb(171 250 153);
@@ -63,7 +66,7 @@
 .stone {
   width: 70%;
   height: 70%;
-  margin: 17.5%;
+  margin: 16%;
   background-color: white;
   border: 1px solid black;
   border-radius: 50%;
@@ -71,12 +74,15 @@
 
 .numBox {
   display: flex;
-  flex-direction: column;
+  flex-flow: column wrap;
   align-items: center;
   justify-content: center;
-  width: 70%;
-  height: 70%;
-  margin: 17.5%;
+  width: 50%;
+  height: 50%;
+  margin: 25.5%;
+  background-color: rgb(255 254 196);
+  border: solid 1px black;
+  border-radius: 30%;
 }
 
 .num {
@@ -85,9 +91,6 @@
   padding-left: 10%;
   line-height: 1;
   text-align: center;
-  background-color: rgb(255 254 196);
-  border: solid 1px black;
-  border-radius: 10%;
 }
 
 .puted {
