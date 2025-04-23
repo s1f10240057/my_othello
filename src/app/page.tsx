@@ -11,6 +11,7 @@ const Home = () => {
   const [comPuted, setcomPuted] = useState([-1, -1]);
   const [comPassCount, setcomPassCount] = useState<number>(0);
   const [userPassCount, setuserPassCount] = useState<number>(0);
+  const [draw, setdraw] = useState<number>(0);
 
   const direction_lst = useMemo(
     () => [
@@ -206,6 +207,7 @@ const Home = () => {
   );
 
   const comTurnProcessing = (newBoard: number[][]) => {
+    setdraw(1);
     const comPutedBoard = putComProcessing(MarkCanPut(newBoard, 2));
     setBoard(comPutedBoard);
     setTurnNum((prev) => prev + 1);
@@ -224,6 +226,7 @@ const Home = () => {
   }, []);
 
   const clickHandler = (x: number, y: number) => {
+    setdraw(0);
     const newBoard = structuredClone(board);
     if (userPassjudge(board)) {
       setuserPassCount((prev) => prev + 1);
@@ -238,11 +241,13 @@ const Home = () => {
     if (newBoard[y][x] <= 0 && allcount > 0) {
       totalPutProseccing(x, y, count_lst, allcount, direction_lst, newBoard, turnColor);
       setTurnNum((prev) => prev + 1);
-      setBoard(comTurnProcessing(newBoard));
+      const markedboard = MarkCanPut(newBoard, turn % 2);
+      setBoard(comTurnProcessing(markedboard));
     }
   };
 
   useEffect(() => {
+    setdraw(0);
     const markedboard = MarkCanPut(board, turn % 2);
     setBoard(markedboard);
     console.log(stonesNum[0], stonesNum[1]);
@@ -275,7 +280,7 @@ const Home = () => {
                 />
               )}
 
-              {color < 0 && (
+              {color < 0 && turnColor === 1 && draw === 0 && (
                 <div className={styles.numBox}>
                   <span className={styles.num}>{-board[y][x]}</span>
                 </div>
