@@ -265,22 +265,36 @@ const Home = () => {
             <div className={styles.cell} key={`${x}-${y}`} onClick={() => clickHandler(x, y)}>
               {color === 1 && <div className={styles.stone} style={{ background: `#000` }} />}
 
-              {color === 2 && <div className={styles.stone} style={{ background: `#fff` }} />}
+              {color === 2 && (
+                <div
+                  className={styles.stone}
+                  style={{
+                    background: `#fff`,
+                    border: `${x === comPuted[0] && y === comPuted[1] ? '4px' : '1px'} solid ${x === comPuted[0] && y === comPuted[1] ? '#1258d1' : '#000'}`,
+                  }}
+                />
+              )}
 
               {color < 0 && (
                 <div className={styles.numBox}>
                   <span className={styles.num}>{-board[y][x]}</span>
                 </div>
               )}
-
-              {x === comPuted[0] && y === comPuted[1] && <div className={styles.puted}>a</div>}
             </div>
           )),
         )}
         {
-          <p>
-            黒:{stonesNum[0]}白{stonesNum[1]}ターン{turn}
-          </p>
+          <div className={styles.scoreContainer}>
+            <div className={styles.scorecontent}>
+              <p className={styles.scoreElement}>{turn}ターン目</p>
+            </div>
+            <div className={styles.scorecontent}>
+              <p className={styles.scoreElement}>black:{stonesNum[0]}</p>
+            </div>
+            <div className={styles.scorecontent}>
+              <p className={styles.scoreElement}>white:{stonesNum[1]}</p>
+            </div>
+          </div>
         }
       </div>
     </div>
