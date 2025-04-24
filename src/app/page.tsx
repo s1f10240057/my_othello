@@ -84,11 +84,11 @@ const Home = () => {
 
   const whoWin = useCallback((stonesNum: number[]) => {
     if (stonesNum[0] > stonesNum[1]) {
-      console.log('黒の勝利!!!');
+      alert('黒の勝利!!!');
     } else if (stonesNum[1] > stonesNum[0]) {
-      console.log('白の勝利!!!');
+      alert('白の勝利!!!');
     } else {
-      console.log('引き分け');
+      alert('引き分け');
     }
   }, []);
 
