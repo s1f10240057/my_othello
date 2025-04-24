@@ -231,6 +231,7 @@ const Home = () => {
     if (userPassjudge(board)) {
       setuserPassCount((prev) => prev + 1);
       console.log('userがパスしました');
+      alert('置けるところがないのでパスしました。');
     } else {
       setcomPassCount(0);
     }
@@ -256,10 +257,10 @@ const Home = () => {
       comPassCount >= 2 ||
       userPassCount >= 2
     ) {
+      console.log('勝利判定通過');
       setTimeout(() => {
-        console.log('1 秒待ちました。');
         whoWin(stonesNum);
-      }, 1000);
+      }, 500);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [turn, MarkCanPut, whoWin]);
@@ -296,10 +297,12 @@ const Home = () => {
               <p className={styles.scoreElement}>{turn}ターン目</p>
             </div>
             <div className={styles.scorecontent}>
-              <p className={styles.scoreElement}>black:{stonesNum[0]}</p>
+              <div className={styles.miniStone} style={{ background: `#000` }} />
+              <p className={styles.scoreElement}>:{stonesNum[0]}</p>
             </div>
             <div className={styles.scorecontent}>
-              <p className={styles.scoreElement}>white:{stonesNum[1]}</p>
+              <div className={styles.miniStone} style={{ background: `#ffffff` }} />
+              <p className={styles.scoreElement}>:{stonesNum[1]}</p>
             </div>
           </div>
         }
