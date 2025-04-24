@@ -245,7 +245,6 @@ const Home = () => {
       setBoard(comTurnProcessing(markedboard));
     }
   };
-
   useEffect(() => {
     setdraw(0);
     const markedboard = MarkCanPut(board, turn % 2);
@@ -257,7 +256,10 @@ const Home = () => {
       comPassCount >= 2 ||
       userPassCount >= 2
     ) {
-      whoWin(stonesNum);
+      setTimeout(() => {
+        console.log('1 秒待ちました。');
+        whoWin(stonesNum);
+      }, 1000);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [turn, MarkCanPut, whoWin]);
