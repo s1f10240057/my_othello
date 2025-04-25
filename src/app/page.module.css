@@ -32,7 +32,8 @@
   width: 20vw;
   height: 10vw;
   background-color: rgb(237 246 117);
-  border: 1px solid black;
+  border: solid 1vw rgb(158 164 68);
+  border-radius: 10%;
 
   /* border-radius: 30%; */
 }
