@@ -278,7 +278,7 @@ const Home = () => {
                   className={styles.stone}
                   style={{
                     background: `#fff`,
-                    border: `${x === comPuted[0] && y === comPuted[1] ? '4px' : '1px'} solid ${x === comPuted[0] && y === comPuted[1] ? '#1258d1' : '#000'}`,
+                    border: `${x === comPuted[0] && y === comPuted[1] ? '4px' : '1px'} solid ${x === comPuted[0] && y === comPuted[1] ? '#ff4444' : '#000'}`,
                   }}
                 />
               )}
