@@ -5,15 +5,15 @@ import styles from './page.module.css';
 
 // fawfe
 const Home = () => {
-  const [turnColor, setTurnColor] = useState(1);
-  const [stonesNum, setstonesNum] = useState([2, 2]);
-  const [turn, setTurnNum] = useState<number>(1);
-  const [comPuted, setcomPuted] = useState([-1, -1]);
-  const [comPassCount, setcomPassCount] = useState<number>(0);
-  const [userPassCount, setuserPassCount] = useState<number>(0);
-  const [draw, setdraw] = useState<number>(0);
+  const [turnColor, changeTurnColor] = useState(1);
+  const [stonesNum, recordStonesNum] = useState([2, 2]);
+  const [turn, recordTurnNum] = useState<number>(1);
+  const [comPuted, recordComPuted] = useState([-1, -1]);
+  const [comPassCount, stackComPassCount] = useState<number>(0);
+  const [userPassCount, stackUserPassCount] = useState<number>(0);
+  const [draw, setdraw] = useState<boolean>(true);
 
-  const direction_lst = useMemo(
+  const dirLst = useMemo(
     () => [
       [1, 0], //右
       [1, 1], //右上
@@ -38,13 +38,54 @@ const Home = () => {
     [0, 0, 0, 0, 0, 0, 0, 0],
   ]);
 
+  const whoWin = useCallback((stonesNum: number[]) => {
+    const black = stonesNum[0];
+    const white = stonesNum[1];
+    if (black > white) {
+      alert('黒の勝利!!!');
+    } else if (white > black) {
+      alert('白の勝利!!!');
+    } else {
+      alert('引き分け');
+    }
+  }, []);
+
+  const checkFinish = useCallback((argBoard: number[][], stonesNum: number[]) => {
+    const black = stonesNum[0];
+    const white = stonesNum[1];
+    if (black === 0 || white === 0) {
+      return true;
+    }
+    for (let y: number = 0; y < 8; y++) {
+      for (let x: number = 0; x < 8; x++) {
+        if (argBoard[y][x] < 0) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }, []);
+
+  const userPassjudge = useCallback((passToboard: number[][]) => {
+    for (let x: number = 0; x < 8; x++) {
+      for (let y: number = 0; y < 8; y++) {
+        if (passToboard[y][x] < 0) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }, []);
+
   const inversionCount = useCallback(
     (x: number, y: number, direction: number[], boardToNum: number[][], color: number) => {
       let count = 0;
+      let targetX;
+      let targetY;
       while (true) {
         count += 1;
-        const targetX = x + direction[0] * count;
-        const targetY = y + direction[1] * count;
+        targetX = x + direction[0] * count;
+        targetY = y + direction[1] * count;
         if (
           boardToNum[targetY] === undefined ||
           boardToNum[targetX] === undefined ||
@@ -62,69 +103,49 @@ const Home = () => {
     [],
   );
 
+  const searchCount = useCallback(
+    (x: number, y: number, dirLst: number[][], argBoard: number[][], argColor: number) => {
+      const count_lst = [];
+      for (let i: number = 0; i < 8; i++) {
+        const count = inversionCount(x, y, dirLst[i], argBoard, argColor);
+        count_lst.push(count);
+      }
+      return count_lst;
+    },
+    [inversionCount],
+  );
+
   const MarkCanPut = useCallback(
-    (boardToMark: number[][], color: number) => {
-      const newcountboard = structuredClone(boardToMark);
+    (argBoard: number[][], color: number) => {
+      const localboard = structuredClone(argBoard);
       let allcount = 0;
       for (let y: number = 0; y < 8; y++) {
         for (let x: number = 0; x < 8; x++) {
           allcount = 0;
-          if (boardToMark[y][x] <= 0) {
+          if (argBoard[y][x] <= 0) {
             for (let i: number = 0; i < 8; i++) {
-              allcount += inversionCount(x, y, direction_lst[i], boardToMark, color);
+              allcount += inversionCount(x, y, dirLst[i], argBoard, color);
             }
-            newcountboard[y][x] = -allcount;
+            localboard[y][x] = -allcount;
           }
         }
       }
-      return newcountboard;
+      return localboard;
     },
-    [inversionCount, direction_lst],
+    [inversionCount, dirLst],
   );
 
-  const whoWin = useCallback((stonesNum: number[]) => {
-    if (stonesNum[0] > stonesNum[1]) {
-      alert('黒の勝利!!!');
-    } else if (stonesNum[1] > stonesNum[0]) {
-      alert('白の勝利!!!');
-    } else {
-      alert('引き分け');
-    }
-  }, []);
-
-  const checkFinish = useCallback((checkToBoard: number[][], stonesNum: number[]) => {
-    if (stonesNum[0] === 0 || stonesNum[1] === 0) {
-      return true;
-    }
-    for (let y: number = 0; y < 8; y++) {
-      for (let x: number = 0; x < 8; x++) {
-        if (checkToBoard[y][x] < 0) {
-          return false;
-        }
-      }
-    }
-    console.log(checkToBoard);
-    return true;
-  }, []);
-
   const Inversionprocessing = useCallback(
-    (
-      x: number,
-      y: number,
-      count: number,
-      direction: number[],
-      newBoard: number[][],
-      color: number,
-    ) => {
+    (x: number, y: number, count: number, dir: number[], argBoard: number[][], color: number) => {
       for (let n: number = 1; n <= count; n++) {
-        newBoard[y + direction[1] * n][x + direction[0] * n] = color;
+        argBoard[y + dir[1] * n][x + dir[0] * n] = color;
       }
     },
     [],
   );
 
   const increaseStoneNum = useCallback((count: number, color: number) => {
-    setstonesNum(([black, white]) => {
+    recordStonesNum(([black, white]) => {
       if (color === 1) {
         return [black + count + 1, white - count];
       } else {
@@ -133,29 +154,17 @@ const Home = () => {
     });
   }, []);
 
-  const decidePutCom = useCallback((boardToDecide: number[][]) => {
+  const decidePutCom = useCallback((argBoard: number[][]) => {
     let biggest = [-1, 0, 0];
     for (let y: number = 0; y < 8; y++) {
       for (let x: number = 0; x < 8; x++) {
-        if (biggest[0] < -boardToDecide[y][x]) {
-          biggest = [-boardToDecide[y][x], x, y];
+        if (biggest[0] < -argBoard[y][x]) {
+          biggest = [-argBoard[y][x], x, y];
         }
       }
     }
     return biggest;
   }, []);
-
-  const searchCount = useCallback(
-    (x: number, y: number, direction_lst: number[][], board: number[][], turnColor: number) => {
-      const count_lst = [];
-      for (let i: number = 0; i < 8; i++) {
-        const count = inversionCount(x, y, direction_lst[i], board, turnColor);
-        count_lst.push(count);
-      }
-      return count_lst;
-    },
-    [inversionCount],
-  );
 
   const totalPutProseccing = useCallback(
     (
@@ -163,15 +172,15 @@ const Home = () => {
       y: number,
       count_lst: number[],
       allcount: number,
-      direction_lst: number[][],
-      newBoard: number[][],
+      dirLst: number[][],
+      argBoard: number[][],
       color: number,
     ) => {
       increaseStoneNum(allcount, color);
-      newBoard[y][x] = color;
+      argBoard[y][x] = color;
       for (let i: number = 0; i < 8; i++) {
         if (count_lst[i] > 0) {
-          Inversionprocessing(x, y, count_lst[i], direction_lst[i], newBoard, color);
+          Inversionprocessing(x, y, count_lst[i], dirLst[i], argBoard, color);
         }
       }
     },
@@ -179,81 +188,72 @@ const Home = () => {
   );
 
   const putComProcessing = useCallback(
-    (ToBoard: number[][]) => {
-      const newBoard = structuredClone(ToBoard);
-      const ePut = decidePutCom(newBoard);
-      const ex = ePut[1];
-      const ey = ePut[2];
-      const color = 2;
-      console.log(ePut);
-      if (ePut[0] <= 0) {
-        setcomPuted([-1, -1]);
+    (argBoard: number[][]) => {
+      const newBoard = structuredClone(argBoard);
+      const comPut = decidePutCom(newBoard);
+      const comX = comPut[1];
+      const comY = comPut[2];
+      const Color = 2;
+      console.log(comPut);
+      if (comPut[0] <= 0) {
+        recordComPuted([-1, -1]);
         console.log('パスしました');
-        setcomPassCount((prev) => prev + 1);
+        stackComPassCount((prev) => prev + 1);
         return newBoard;
       } else {
-        setcomPassCount(0);
+        stackComPassCount(0);
       }
-      setcomPuted([ePut[1], ePut[2]]);
 
-      const count_lst = searchCount(ex, ey, direction_lst, newBoard, color);
-      const allcount = count_lst.reduce((acc, value) => acc + value, 0);
+      recordComPuted([comX, comY]);
 
-      totalPutProseccing(ex, ey, count_lst, allcount, direction_lst, newBoard, color);
-      setTurnColor(2 / color);
+      const countLst = searchCount(comX, comY, dirLst, newBoard, Color);
+      const allCount = countLst.reduce((acc, value) => acc + value, 0);
+
+      totalPutProseccing(comX, comY, countLst, allCount, dirLst, newBoard, Color);
+      changeTurnColor(2 / Color);
       return newBoard;
     },
-    [direction_lst, decidePutCom, searchCount, totalPutProseccing],
+    [dirLst, decidePutCom, searchCount, totalPutProseccing],
   );
 
-  const comTurnProcessing = (newBoard: number[][]) => {
-    setdraw(1);
-    const comPutedBoard = putComProcessing(MarkCanPut(newBoard, 2));
+  const comTurnProcessing = (argBoard: number[][]) => {
+    setdraw(false);
+    const comPutedBoard = putComProcessing(MarkCanPut(argBoard, 2));
     setBoard(comPutedBoard);
-    setTurnNum((prev) => prev + 1);
+    recordTurnNum((prev) => prev + 1);
     return comPutedBoard;
   };
 
-  const userPassjudge = useCallback((passToboard: number[][]) => {
-    for (let x: number = 0; x < 8; x++) {
-      for (let y: number = 0; y < 8; y++) {
-        if (passToboard[y][x] < 0) {
-          return false;
-        }
-      }
-    }
-    return true;
-  }, []);
-
   const clickHandler = (x: number, y: number) => {
-    setdraw(0);
+    setdraw(true);
     const newBoard = structuredClone(board);
     if (userPassjudge(board)) {
-      setuserPassCount((prev) => prev + 1);
+      stackUserPassCount((prev) => prev + 1);
       console.log('userがパスしました');
       alert('置けるところがないのでパスしました。');
     } else {
-      setcomPassCount(0);
+      stackComPassCount(0);
     }
 
-    const count_lst = searchCount(x, y, direction_lst, newBoard, turnColor);
+    const count_lst = searchCount(x, y, dirLst, newBoard, turnColor);
     const allcount = count_lst.reduce((acc, value) => acc + value, 0);
 
     if (newBoard[y][x] <= 0 && allcount > 0) {
-      totalPutProseccing(x, y, count_lst, allcount, direction_lst, newBoard, turnColor);
-      setTurnNum((prev) => prev + 1);
+      totalPutProseccing(x, y, count_lst, allcount, dirLst, newBoard, turnColor);
+      recordTurnNum((prev) => prev + 1);
       const markedboard = MarkCanPut(newBoard, turn % 2);
       setBoard(comTurnProcessing(markedboard));
     }
   };
+
   useEffect(() => {
-    setdraw(0);
-    const markedboard = MarkCanPut(board, turn % 2);
-    setBoard(markedboard);
+    setdraw(true);
+    const markedBoard = MarkCanPut(board, turn % 2);
+    setBoard(markedBoard);
     console.log(stonesNum[0], stonesNum[1]);
     console.log(`${turn}ターン目`);
     if (
-      (checkFinish(markedboard, stonesNum) && turn !== 1) ||
+      (checkFinish(markedBoard, stonesNum) && turn !== 1) ||
       comPassCount >= 2 ||
       userPassCount >= 2
     ) {
@@ -263,7 +263,7 @@ const Home = () => {
       }, 500);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [turn, MarkCanPut, whoWin]);
+  }, [turn]);
 
   return (
     <div className={styles.container}>
@@ -283,7 +283,7 @@ const Home = () => {
                 />
               )}
 
-              {color < 0 && turnColor === 1 && draw === 0 && (
+              {color < 0 && turnColor === 1 && draw === true && (
                 <div className={styles.numBox}>
                   <span className={styles.num}>{-board[y][x]}</span>
                 </div>
