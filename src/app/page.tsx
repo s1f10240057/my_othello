@@ -5,14 +5,15 @@ import styles from './page.module.css';
 
 // fawfe
 const Home = () => {
-  const [turnColor, changeTurnColor] = useState(1);
-  const [stonesNum, recordStonesNum] = useState([2, 2]);
-  const [turn, recordTurnNum] = useState<number>(1);
-  const [comPuted, recordComPuted] = useState([-1, -1]);
-  const [comPassCount, stackComPassCount] = useState<number>(0);
-  const [userPassCount, stackUserPassCount] = useState<number>(0);
-  const [draw, setdraw] = useState<boolean>(true);
+  const [turnColor, changeTurnColor] = useState(1); //カラー
+  const [stonesNum, recordStonesNum] = useState([2, 2]); //カラー 石の数を数える。0:黒 1:白
+  const [turn, recordTurnNum] = useState<number>(1); // ターン数計測
+  const [comPuted, recordComPuted] = useState([-1, -1]); // コンピューターが置いた位置を記憶
+  const [comPassCount, stackComPassCount] = useState<number>(0); //コンピューターがパスした数をカウント
+  const [userPassCount, stackUserPassCount] = useState<number>(0); //ユーザーがパスした数をカウント
+  const [draw, setdraw] = useState<boolean>(true); // 評価値を表示許可
 
+  // 方向リスト
   const dirLst = useMemo(
     () => [
       [1, 0], //右
@@ -38,6 +39,7 @@ const Home = () => {
     [0, 0, 0, 0, 0, 0, 0, 0],
   ]);
 
+  ///勝者判断処理
   const whoWin = useCallback((stonesNum: number[]) => {
     const black = stonesNum[0];
     const white = stonesNum[1];
@@ -50,6 +52,7 @@ const Home = () => {
     }
   }, []);
 
+  ///終了判断処理
   const checkFinish = useCallback((argBoard: number[][], stonesNum: number[]) => {
     const black = stonesNum[0];
     const white = stonesNum[1];
@@ -66,6 +69,7 @@ const Home = () => {
     return true;
   }, []);
 
+  ///ユーザーのおける石があるか確認し、置ける場所が無かったらパスする処理
   const userPassjudge = useCallback((passToboard: number[][]) => {
     for (let x: number = 0; x < 8; x++) {
       for (let y: number = 0; y < 8; y++) {
@@ -77,8 +81,9 @@ const Home = () => {
     return true;
   }, []);
 
+  /// 引数の座標に引数の色を置いたときに、引数の方向に対して何個ひっくり返せるか判断する処理(user.com併用)
   const inversionCount = useCallback(
-    (x: number, y: number, direction: number[], boardToNum: number[][], color: number) => {
+    (x: number, y: number, direction: number[], argBoard: number[][], color: number) => {
       let count = 0;
       let targetX;
       let targetY;
@@ -87,13 +92,13 @@ const Home = () => {
         targetX = x + direction[0] * count;
         targetY = y + direction[1] * count;
         if (
-          boardToNum[targetY] === undefined ||
-          boardToNum[targetX] === undefined ||
-          boardToNum[targetY][targetX] <= 0
+          argBoard[targetY] === undefined ||
+          argBoard[targetX] === undefined ||
+          argBoard[targetY][targetX] <= 0
         ) {
           count = 0;
           break;
-        } else if (boardToNum[targetY][targetX] === color) {
+        } else if (argBoard[targetY][targetX] === color) {
           count -= 1;
           break;
         }
@@ -103,6 +108,8 @@ const Home = () => {
     [],
   );
 
+  /// 引数の座標に対してinversionCountを8方向に利用することで、
+  /// 引数の座標に置いたときひっくり返せる石の総合計数を数える処理(user.com併用)
   const searchCount = useCallback(
     (x: number, y: number, dirLst: number[][], argBoard: number[][], argColor: number) => {
       const count_lst = [];
@@ -115,6 +122,7 @@ const Home = () => {
     [inversionCount],
   );
 
+  /// 引数ボードから、引数カラーで置ける位置を特定し、ひっくり返せる場所と数を負数でマークする処理(user.com併用)
   const MarkCanPut = useCallback(
     (argBoard: number[][], color: number) => {
       const localboard = structuredClone(argBoard);
@@ -135,7 +143,8 @@ const Home = () => {
     [inversionCount, dirLst],
   );
 
-  const Inversionprocessing = useCallback(
+  /// 引数の座標を起点にして、引数の方向に石をひっくり返す処理(user.com併用)
+  const InversionProcessing = useCallback(
     (x: number, y: number, count: number, dir: number[], argBoard: number[][], color: number) => {
       for (let n: number = 1; n <= count; n++) {
         argBoard[y + dir[1] * n][x + dir[0] * n] = color;
@@ -144,6 +153,7 @@ const Home = () => {
     [],
   );
 
+  /// 石を置いたときに発生する石の増減をカウントする処理(user.com併用)
   const increaseStoneNum = useCallback((count: number, color: number) => {
     recordStonesNum(([black, white]) => {
       if (color === 1) {
@@ -154,6 +164,7 @@ const Home = () => {
     });
   }, []);
 
+  /// comの石を置く位置を決定する処理(com専用)
   const decidePutCom = useCallback((argBoard: number[][]) => {
     let biggest = [-1, 0, 0];
     for (let y: number = 0; y < 8; y++) {
@@ -166,6 +177,7 @@ const Home = () => {
     return biggest;
   }, []);
 
+  /// 石を置くときの総処理(user,com併用)
   const totalPutProseccing = useCallback(
     (
       x: number,
@@ -180,13 +192,14 @@ const Home = () => {
       argBoard[y][x] = color;
       for (let i: number = 0; i < 8; i++) {
         if (count_lst[i] > 0) {
-          Inversionprocessing(x, y, count_lst[i], dirLst[i], argBoard, color);
+          InversionProcessing(x, y, count_lst[i], dirLst[i], argBoard, color);
         }
       }
     },
-    [increaseStoneNum, Inversionprocessing],
+    [increaseStoneNum, InversionProcessing],
   );
 
+  /// comの石を置く総処理(com専用)
   const putComProcessing = useCallback(
     (argBoard: number[][]) => {
       const newBoard = structuredClone(argBoard);
@@ -216,6 +229,7 @@ const Home = () => {
     [dirLst, decidePutCom, searchCount, totalPutProseccing],
   );
 
+  /// comのターンの総処理(com専用)
   const comTurnProcessing = (argBoard: number[][]) => {
     setdraw(false);
     const comPutedBoard = putComProcessing(MarkCanPut(argBoard, 2));
@@ -224,6 +238,7 @@ const Home = () => {
     return comPutedBoard;
   };
 
+  /// クリックしたときの総処理(user専用)
   const clickHandler = (x: number, y: number) => {
     setdraw(true);
     const newBoard = structuredClone(board);
@@ -246,6 +261,7 @@ const Home = () => {
     }
   };
 
+  /// 起動時・ターン終了時に行う処理
   useEffect(() => {
     setdraw(true);
     const markedBoard = MarkCanPut(board, turn % 2);
@@ -312,6 +328,8 @@ const Home = () => {
 };
 
 export default Home;
+
+/// 石をリアルタイムでカウントする処理
 
 // const CountStone = () => {
 //   let black = 0;
