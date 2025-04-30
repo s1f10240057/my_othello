@@ -11,7 +11,7 @@ const Home = () => {
   const [comPuted, recordComPuted] = useState([-1, -1]); // コンピューターが置いた位置を記憶
   const [comPassCount, stackComPassCount] = useState<number>(0); //コンピューターがパスした数をカウント
   const [userPassCount, stackUserPassCount] = useState<number>(0); //ユーザーがパスした数をカウント
-  const [draw, setdraw] = useState<boolean>(true); // 評価値を表示許可
+  const [draw, setdraw] = useState<boolean>(true); // 評価値の表示許可
 
   // 方向リスト
   const dirLst = useMemo(
@@ -113,8 +113,9 @@ const Home = () => {
   const searchCount = useCallback(
     (x: number, y: number, dirLst: number[][], argBoard: number[][], argColor: number) => {
       const count_lst = [];
+      let count = 0;
       for (let i: number = 0; i < 8; i++) {
-        const count = inversionCount(x, y, dirLst[i], argBoard, argColor);
+        count = inversionCount(x, y, dirLst[i], argBoard, argColor);
         count_lst.push(count);
       }
       return count_lst;
@@ -207,6 +208,8 @@ const Home = () => {
       const comX = comPut[1];
       const comY = comPut[2];
       const Color = 2;
+      let countLst = [];
+      let allCount = 0;
       console.log(comPut);
       if (comPut[0] <= 0) {
         recordComPuted([-1, -1]);
@@ -219,8 +222,8 @@ const Home = () => {
 
       recordComPuted([comX, comY]);
 
-      const countLst = searchCount(comX, comY, dirLst, newBoard, Color);
-      const allCount = countLst.reduce((acc, value) => acc + value, 0);
+      countLst = searchCount(comX, comY, dirLst, newBoard, Color);
+      allCount = countLst.reduce((acc, value) => acc + value, 0);
 
       totalPutProseccing(comX, comY, countLst, allCount, dirLst, newBoard, Color);
       changeTurnColor(2 / Color);
@@ -241,6 +244,9 @@ const Home = () => {
   /// クリックしたときの総処理(user専用)
   const clickHandler = (x: number, y: number) => {
     setdraw(true);
+    let count_lst = [];
+    let allcount = 0;
+    let markedboard = [];
     const newBoard = structuredClone(board);
     if (userPassjudge(board)) {
       stackUserPassCount((prev) => prev + 1);
@@ -250,13 +256,13 @@ const Home = () => {
       stackComPassCount(0);
     }
 
-    const count_lst = searchCount(x, y, dirLst, newBoard, turnColor);
-    const allcount = count_lst.reduce((acc, value) => acc + value, 0);
+    count_lst = searchCount(x, y, dirLst, newBoard, turnColor);
+    allcount = count_lst.reduce((acc, value) => acc + value, 0);
 
     if (newBoard[y][x] <= 0 && allcount > 0) {
       totalPutProseccing(x, y, count_lst, allcount, dirLst, newBoard, turnColor);
       recordTurnNum((prev) => prev + 1);
-      const markedboard = MarkCanPut(newBoard, turn % 2);
+      markedboard = MarkCanPut(newBoard, turn % 2);
       setBoard(comTurnProcessing(markedboard));
     }
   };
