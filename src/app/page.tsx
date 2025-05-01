@@ -6,7 +6,7 @@ import styles from './page.module.css';
 // fawfe
 const Home = () => {
   const [turnColor, changeTurnColor] = useState(1); //カラー
-  const [stonesNum, recordStonesNum] = useState([2, 2]); //カラー 石の数を数える。0:黒 1:白
+  const [stonesNum, recordStonesNum] = useState([3, 1]); //カラー 石の数を数える。0:黒 1:白
   const [turn, recordTurnNum] = useState<number>(1); // ターン数計測
   const [comPuted, recordComPuted] = useState([-1, -1]); // コンピューターが置いた位置を記憶
   const [comPassCount, stackComPassCount] = useState<number>(0); //コンピューターがパスした数をカウント
@@ -33,7 +33,7 @@ const Home = () => {
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 1, 2, 0, 0, 0],
-    [0, 0, 0, 2, 1, 0, 0, 0],
+    [0, 0, 0, 1, 1, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
@@ -68,6 +68,7 @@ const Home = () => {
         }
       }
     }
+    console.log(argBoard);
     console.log('ノーマルエンド');
     return true;
   }, []);
@@ -244,19 +245,58 @@ const Home = () => {
   //   return comPutedBoard;
   // };
 
+  const checkFinishProcessing = (
+    argBoard: number[][],
+    argstonesNum: number[],
+    argturn: number,
+    comPassCount: number,
+    userPassCount: number,
+  ) => {
+    if (
+      (checkFinish(argBoard, argstonesNum) && argturn !== 1) ||
+      comPassCount >= 2 ||
+      userPassCount >= 2
+    ) {
+      setTimeout(() => {
+        whoWin(argstonesNum);
+      }, 500);
+    }
+  };
+
+  const passProcess = (board: number[][], argcolor: number) => {
+    if (stonesNum[0] + stonesNum[1] === 64 || stonesNum[0] === 0 || stonesNum[1] === 0) {
+      return false;
+    }
+    if (argcolor === 1) {
+      if (userPassjudge(board)) {
+        stackUserPassCount((prev) => prev + 1);
+        console.log('user(黒)がパスしました');
+        alert('置けるところがないのでパスしました。(黒)');
+        return true;
+      } else {
+        stackComPassCount(0);
+        return false;
+      }
+    } else {
+      if (userPassjudge(board)) {
+        stackComPassCount((prev) => prev + 1);
+        console.log('user(白)がパスしました');
+        alert('置けるところがないのでパスしました。(白)');
+        return true;
+      } else {
+        stackUserPassCount(0);
+        return false;
+      }
+    }
+  };
+
   /// クリックしたときの総処理(user専用)
   const clickHandler = (x: number, y: number) => {
     // setdraw(true);
     let count_lst = [];
     let allcount = 0;
     const newBoard = structuredClone(board);
-    if (userPassjudge(board)) {
-      stackUserPassCount((prev) => prev + 1);
-      console.log('userがパスしました');
-      alert('置けるところがないのでパスしました。');
-    } else {
-      stackComPassCount(0);
-    }
+    passProcess(board, turnColor);
 
     count_lst = searchCount(x, y, dirLst, newBoard, turnColor);
     allcount = count_lst.reduce((acc, value) => acc + value, 0);
@@ -267,6 +307,7 @@ const Home = () => {
 
       setBoard(MarkCanPut(newBoard, 2 / turn));
       changeTurnColor((prev) => 2 / prev);
+
       // setBoard(comTurnProcessing(markedboard));
     }
   };
@@ -274,19 +315,19 @@ const Home = () => {
   /// 起動時・ターン終了時に行う処理
   useEffect(() => {
     // setdraw(true);
+    console.log(`色:${turnColor}`);
     const markedBoard = MarkCanPut(board, turnColor);
     setBoard(markedBoard);
-    console.log(stonesNum[0], stonesNum[1]);
     console.log(`${turn}ターン目`);
-    if (
-      (checkFinish(markedBoard, stonesNum) && turn !== 1) ||
-      comPassCount >= 2 ||
-      userPassCount >= 2
-    ) {
-      setTimeout(() => {
-        whoWin(stonesNum);
-      }, 500);
+    if (passProcess(markedBoard, turnColor) === false) {
+      console.log('Noパス');
+      checkFinishProcessing(markedBoard, stonesNum, turn, comPassCount, userPassCount);
+    } else {
+      console.log('パス');
+      recordTurnNum((prev) => prev + 1);
+      changeTurnColor((prev) => 2 / prev);
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [turn]);
 
