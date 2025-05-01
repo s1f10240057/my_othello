@@ -6,7 +6,7 @@ import styles from './page.module.css';
 // fawfe
 const Home = () => {
   const [turnColor, changeTurnColor] = useState(1); //カラー
-  const [stonesNum, recordStonesNum] = useState([3, 1]); //カラー 石の数を数える。0:黒 1:白
+  const [stonesNum, recordStonesNum] = useState([2, 2]); //カラー 石の数を数える。0:黒 1:白
   const [turn, recordTurnNum] = useState<number>(1); // ターン数計測
   const [comPuted, recordComPuted] = useState([-1, -1]); // コンピューターが置いた位置を記憶
   const [comPassCount, stackComPassCount] = useState<number>(0); //コンピューターがパスした数をカウント
@@ -33,7 +33,7 @@ const Home = () => {
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 1, 2, 0, 0, 0],
-    [0, 0, 0, 1, 1, 0, 0, 0],
+    [0, 0, 0, 2, 1, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
@@ -267,26 +267,22 @@ const Home = () => {
     if (stonesNum[0] + stonesNum[1] === 64 || stonesNum[0] === 0 || stonesNum[1] === 0) {
       return false;
     }
-    if (argcolor === 1) {
-      if (userPassjudge(board)) {
+    if (userPassjudge(board)) {
+      if (argcolor === 1) {
         stackUserPassCount((prev) => prev + 1);
-        console.log('user(黒)がパスしました');
         alert('置けるところがないのでパスしました。(黒)');
-        return true;
       } else {
-        stackComPassCount(0);
-        return false;
-      }
-    } else {
-      if (userPassjudge(board)) {
         stackComPassCount((prev) => prev + 1);
-        console.log('user(白)がパスしました');
         alert('置けるところがないのでパスしました。(白)');
-        return true;
+      }
+      return true;
+    } else {
+      if (argcolor === 1) {
+        stackComPassCount(0);
       } else {
         stackUserPassCount(0);
-        return false;
       }
+      return false;
     }
   };
 
