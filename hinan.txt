@@ -11,7 +11,7 @@ const Home = () => {
   const [comPuted, recordComPuted] = useState([-1, -1]); // コンピューターが置いた位置を記憶
   const [comPassCount, stackComPassCount] = useState<number>(0); //コンピューターがパスした数をカウント
   const [userPassCount, stackUserPassCount] = useState<number>(0); //ユーザーがパスした数をカウント
-  // const [draw, setdraw] = useState<boolean>(true); // 評価値の表示許可
+  const [draw, setdraw] = useState<boolean>(true); // 評価値の表示許可
 
   // 方向リスト
   const dirLst = useMemo(
@@ -57,18 +57,15 @@ const Home = () => {
     const black = stonesNum[0];
     const white = stonesNum[1];
     if (black === 0 || white === 0) {
-      console.log('全滅エンド');
       return true;
     }
     for (let y: number = 0; y < 8; y++) {
       for (let x: number = 0; x < 8; x++) {
         if (argBoard[y][x] < 0) {
-          console.log('ゲーム進続行');
           return false;
         }
       }
     }
-    console.log('ノーマルエンド');
     return true;
   }, []);
 
@@ -169,17 +166,17 @@ const Home = () => {
   }, []);
 
   /// comの石を置く位置を決定する処理(com専用)
-  // const decidePutCom = useCallback((argBoard: number[][]) => {
-  //   let biggest = [-1, 0, 0];
-  //   for (let y: number = 0; y < 8; y++) {
-  //     for (let x: number = 0; x < 8; x++) {
-  //       if (biggest[0] < -argBoard[y][x]) {
-  //         biggest = [-argBoard[y][x], x, y];
-  //       }
-  //     }
-  //   }
-  //   return biggest;
-  // }, []);
+  const decidePutCom = useCallback((argBoard: number[][]) => {
+    let biggest = [-1, 0, 0];
+    for (let y: number = 0; y < 8; y++) {
+      for (let x: number = 0; x < 8; x++) {
+        if (biggest[0] < -argBoard[y][x]) {
+          biggest = [-argBoard[y][x], x, y];
+        }
+      }
+    }
+    return biggest;
+  }, []);
 
   /// 石を置くときの総処理(user,com併用)
   const totalPutProseccing = useCallback(
@@ -204,51 +201,52 @@ const Home = () => {
   );
 
   /// comの石を置く総処理(com専用)
-  // const putComProcessing = useCallback(
-  //   (argBoard: number[][]) => {
-  //     const newBoard = structuredClone(argBoard);
-  //     const comPut = decidePutCom(newBoard);
-  //     const comX = comPut[1];
-  //     const comY = comPut[2];
-  //     const Color = 2;
-  //     let countLst = [];
-  //     let allCount = 0;
-  //     console.log(comPut);
-  //     if (comPut[0] <= 0) {
-  //       recordComPuted([-1, -1]);
-  //       console.log('パスしました');
-  //       stackComPassCount((prev) => prev + 1);
-  //       return newBoard;
-  //     } else {
-  //       stackComPassCount(0);
-  //     }
+  const putComProcessing = useCallback(
+    (argBoard: number[][]) => {
+      const newBoard = structuredClone(argBoard);
+      const comPut = decidePutCom(newBoard);
+      const comX = comPut[1];
+      const comY = comPut[2];
+      const Color = 2;
+      let countLst = [];
+      let allCount = 0;
+      console.log(comPut);
+      if (comPut[0] <= 0) {
+        recordComPuted([-1, -1]);
+        console.log('パスしました');
+        stackComPassCount((prev) => prev + 1);
+        return newBoard;
+      } else {
+        stackComPassCount(0);
+      }
 
-  //     recordComPuted([comX, comY]);
+      recordComPuted([comX, comY]);
 
-  //     countLst = searchCount(comX, comY, dirLst, newBoard, Color);
-  //     allCount = countLst.reduce((acc, value) => acc + value, 0);
+      countLst = searchCount(comX, comY, dirLst, newBoard, Color);
+      allCount = countLst.reduce((acc, value) => acc + value, 0);
 
-  //     totalPutProseccing(comX, comY, countLst, allCount, dirLst, newBoard, Color);
-  //     changeTurnColor(2 / Color);
-  //     return newBoard;
-  //   },
-  //   [dirLst, decidePutCom, searchCount, totalPutProseccing],
-  // );
+      totalPutProseccing(comX, comY, countLst, allCount, dirLst, newBoard, Color);
+      changeTurnColor(2 / Color);
+      return newBoard;
+    },
+    [dirLst, decidePutCom, searchCount, totalPutProseccing],
+  );
 
   /// comのターンの総処理(com専用)
-  // const comTurnProcessing = (argBoard: number[][]) => {
-  //   // setdraw(false);
-  //   const comPutedBoard = putComProcessing(MarkCanPut(argBoard, 2));
-  //   setBoard(comPutedBoard);
-  //   recordTurnNum((prev) => prev + 1);
-  //   return comPutedBoard;
-  // };
+  const comTurnProcessing = (argBoard: number[][]) => {
+    setdraw(false);
+    const comPutedBoard = putComProcessing(MarkCanPut(argBoard, 2));
+    setBoard(comPutedBoard);
+    recordTurnNum((prev) => prev + 1);
+    return comPutedBoard;
+  };
 
   /// クリックしたときの総処理(user専用)
   const clickHandler = (x: number, y: number) => {
-    // setdraw(true);
+    setdraw(true);
     let count_lst = [];
     let allcount = 0;
+    let markedboard = [];
     const newBoard = structuredClone(board);
     if (userPassjudge(board)) {
       stackUserPassCount((prev) => prev + 1);
@@ -264,17 +262,15 @@ const Home = () => {
     if (newBoard[y][x] <= 0 && allcount > 0) {
       totalPutProseccing(x, y, count_lst, allcount, dirLst, newBoard, turnColor);
       recordTurnNum((prev) => prev + 1);
-
-      setBoard(MarkCanPut(newBoard, 2 / turn));
-      changeTurnColor((prev) => 2 / prev);
-      // setBoard(comTurnProcessing(markedboard));
+      markedboard = MarkCanPut(newBoard, turn % 2);
+      setBoard(comTurnProcessing(markedboard));
     }
   };
 
   /// 起動時・ターン終了時に行う処理
   useEffect(() => {
-    // setdraw(true);
-    const markedBoard = MarkCanPut(board, turnColor);
+    setdraw(true);
+    const markedBoard = MarkCanPut(board, turn % 2);
     setBoard(markedBoard);
     console.log(stonesNum[0], stonesNum[1]);
     console.log(`${turn}ターン目`);
@@ -283,6 +279,7 @@ const Home = () => {
       comPassCount >= 2 ||
       userPassCount >= 2
     ) {
+      console.log('勝利判定通過');
       setTimeout(() => {
         whoWin(stonesNum);
       }, 500);
@@ -308,7 +305,7 @@ const Home = () => {
                 />
               )}
 
-              {color < 0 && (
+              {color < 0 && turnColor === 1 && draw === true && (
                 <div className={styles.numBox}>
                   <span className={styles.num}>{-board[y][x]}</span>
                 </div>
