@@ -142,17 +142,6 @@ const Home = () => {
     [],
   );
 
-  // const [board, setBoard] = useState([
-  //   [1, 1, 1, 1, 1, 1, 1, 1],
-  //   [2, 1, 1, 1, 2, 1, 1, 1],
-  //   [0, 1, 1, 1, 0, 1, 1, 1],
-  //   [1, 1, 1, 1, 1, 0, 2, 1],
-  //   [1, 1, 1, 1, 1, 1, 1, 1],
-  //   [0, 1, 1, 1, 1, 1, 1, 0],
-  //   [2, 1, 1, 1, 1, 1, 1, 2],
-  //   [1, 1, 1, 1, 1, 1, 1, 1],
-  // ]);
-
   const [board, setBoard] = useState([
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
@@ -291,6 +280,9 @@ const Home = () => {
 
   return (
     <div className={styles.container}>
+      <p className={styles.smartphone}>
+        黒:{stonesNum[0]} 白:{stonesNum[1]}
+      </p>
       <div className={styles.board}>
         {board.map((row, y) =>
           row.map((color, x) => (
@@ -326,6 +318,7 @@ const Home = () => {
               <div className={styles.miniStone} style={{ background: `#ffffff` }} />
               <p className={styles.scoreElement}>:{stonesNum[1]}</p>
             </div>
+            <div className={styles.smartphone} />
           </div>
         }
       </div>
