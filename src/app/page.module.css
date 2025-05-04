@@ -109,23 +109,8 @@
   background-color: rgb(132 41 41);
 }
 
-.miniStone {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 7%;
-  height: 50%;
-  margin-top: 8%;
-  color: aliceblue;
-  background-color: white;
-  border: 1px solid black;
-  border-radius: 50%;
-  transform: translate(0, -50%);
-}
-
 .smartphone {
   display: none;
-  color: aliceblue;
 }
 
 @media screen and (width <= 768px) {
@@ -159,7 +144,18 @@
   }
 
   .smartphone {
+    position: relative;
+    bottom: 3vw;
     display: flex;
-    color: aliceblue;
+    flex-direction: column;
+    align-items: center;
+    width: 50vw;
+    padding-right: 0.25rem;
+    padding-left: 0.25rem;
+    text-align: center;
+    background-color: rgb(237 246 117);
+    border-top: 0.25rem solid rgb(158 164 68);
+    border-bottom: 0.25rem solid rgb(158 164 68);
+    border-radius: 10%;
   }
 }

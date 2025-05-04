@@ -276,9 +276,22 @@ const Home = () => {
 
   return (
     <div className={styles.container}>
-      <p className={styles.smartphone}>
-        黒:{stonesNum[0]} 白:{stonesNum[1]}
-      </p>
+      <div className={styles.smartphone}>
+        {turn - 1}ターン目
+        <br />{' '}
+        <div>
+          <img
+            src="https://chicodeza.com/wordpress/wp-content/uploads/osero-illust1.png"
+            width="20wv"
+          />
+          :{stonesNum[0]}{' '}
+          <img
+            src="https://chicodeza.com/wordpress/wp-content/uploads/osero-illust2.png"
+            width="20wv"
+          />
+          :{stonesNum[1]}
+        </div>
+      </div>
       <div className={styles.board}>
         {board.map((row, y) =>
           row.map((color, x) => (
@@ -307,11 +320,17 @@ const Home = () => {
               <p className={styles.scoreElement}>{turn - 1}ターン目</p>
             </div>
             <div className={styles.scorecontent}>
-              <div className={styles.miniStone} style={{ background: `#000` }} />
+              <img
+                src="https://chicodeza.com/wordpress/wp-content/uploads/osero-illust1.png"
+                width="20wv"
+              />
               <p className={styles.scoreElement}>:{stonesNum[0]}</p>
             </div>
             <div className={styles.scorecontent}>
-              <div className={styles.miniStone} style={{ background: `#ffffff` }} />
+              <img
+                src="https://chicodeza.com/wordpress/wp-content/uploads/osero-illust2.png"
+                width="20wv"
+              />
               <p className={styles.scoreElement}>:{stonesNum[1]}</p>
             </div>
             <div className={styles.smartphone} />
