@@ -67,6 +67,10 @@
   border-radius: 10%;
 }
 
+.cell:hover {
+  background-color: rgb(248 189 189);
+}
+
 .stone {
   width: 70%;
   height: 70%;
