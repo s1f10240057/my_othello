@@ -7,13 +7,15 @@ import styles from './page.module.css';
 const whoWin = (stonesNum: number[]) => {
   const black = stonesNum[0];
   const white = stonesNum[1];
-  if (black > white) {
-    alert('黒の勝利!!!');
-  } else if (white > black) {
-    alert('白の勝利!!!');
-  } else {
-    alert('引き分け');
-  }
+  setTimeout(() => {
+    if (black > white) {
+      alert('黒の勝利!!!');
+    } else if (white > black) {
+      alert('白の勝利!!!');
+    } else {
+      alert('引き分け');
+    }
+  }, 500);
 };
 
 ///終了判断処理
@@ -194,10 +196,10 @@ const Home = () => {
     arguserPassCount: number,
     argcomPassCount: number,
   ) => {
-    /// 石の数を合わせると64個になる。一方が全滅している。パスカウントが2であるときにfalse
-    if (argBoard.flat(2).every((x) => x > 0)) {
+    /// 置ける場所がない場合に勝敗判定
+    if (argBoard.flat(2).every((x) => x > 0 || argstonesNum.some((x) => x === 0))) {
       whoWin(argstonesNum);
-      return false;
+      return 2;
     }
     if (userPassjudge(argBoard)) {
       if (argcolor === 1) {
@@ -207,13 +209,12 @@ const Home = () => {
         stackComPassCount((prev) => prev + 1);
         alert('置けるところがないのでパスしました。(白)');
       }
+      /// 二階連続でパスをしたら強制的に終了し勝敗判定
       if (arguserPassCount + 1 === 2 || argcomPassCount + 1 === 2) {
-        console.log('passend');
         whoWin(argstonesNum);
       }
       changeTurnColor((prev) => 2 / prev);
-      console.log('pass');
-      return true;
+      return 0;
     } else {
       /// パスを行わない場合false
       if (argcolor === 1) {
@@ -221,7 +222,7 @@ const Home = () => {
       } else {
         stackComPassCount(0);
       }
-      return false;
+      return 1;
     }
   };
 
@@ -230,20 +231,27 @@ const Home = () => {
     argturnColor: number,
     argstonesNum: number[],
   ) => {
-    console.log(comPassCount);
     const markedBoard = MarkCanPut(argBoard, dirLst, argturnColor);
     setBoard(markedBoard);
-    console.log(userPassCount, comPassCount);
+    const result = passProcess(
+      markedBoard,
+      argturnColor,
+      argstonesNum,
+      userPassCount,
+      comPassCount,
+    );
     if (
       /// パスを行うか判断する。ついでに、Passcountの数値を確認し、勝利判定を行う
-      passProcess(markedBoard, argturnColor, argstonesNum, userPassCount, comPassCount)
+      result === 0
     ) {
       /// パスしたときの処理
       const markedBoard = MarkCanPut(argBoard, dirLst, 2 / argturnColor);
       setBoard(markedBoard);
     }
-    checkFinishProcessing(markedBoard, argstonesNum, turn);
-    recordTurnNum((prev) => prev + 1);
+    if (result !== 2) {
+      checkFinishProcessing(markedBoard, argstonesNum, turn);
+      recordTurnNum((prev) => prev + 1);
+    }
   };
 
   /// クリックしたときの総処理(user専用)
