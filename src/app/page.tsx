@@ -203,11 +203,15 @@ const Home = () => {
     }
     if (userPassjudge(argBoard)) {
       if (argcolor === 1) {
-        stackUserPassCount((prev) => prev + 1);
-        alert('置けるところがないのでパスしました。(黒)');
+        setTimeout(() => {
+          stackUserPassCount((prev) => prev + 1);
+          alert('置けるところがないのでパスしました。(黒)');
+        }, 500);
       } else {
-        stackComPassCount((prev) => prev + 1);
-        alert('置けるところがないのでパスしました。(白)');
+        setTimeout(() => {
+          stackComPassCount((prev) => prev + 1);
+          alert('置けるところがないのでパスしました。(白)');
+        }, 500);
       }
       /// 二階連続でパスをしたら強制的に終了し勝敗判定
       if (arguserPassCount + 1 === 2 || argcomPassCount + 1 === 2) {
