@@ -199,11 +199,6 @@ const Home = () => {
       whoWin(argstonesNum);
       return false;
     }
-    if (checkFinishProcessing(argBoard, argstonesNum, turn) === false) {
-      console.log(argBoard);
-      console.log('end');
-      return false;
-    }
     if (userPassjudge(argBoard)) {
       if (argcolor === 1) {
         stackUserPassCount((prev) => prev + 1);
@@ -247,6 +242,7 @@ const Home = () => {
       const markedBoard = MarkCanPut(argBoard, dirLst, 2 / argturnColor);
       setBoard(markedBoard);
     }
+    checkFinishProcessing(markedBoard, argstonesNum, turn);
     recordTurnNum((prev) => prev + 1);
   };
 
