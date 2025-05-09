@@ -3,6 +3,14 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import styles from './page.module.css';
 
+const calcblackpoint = (board: number[][]) => {
+  return board.flat(2).filter((x) => x === 1).length;
+};
+
+const calcwhitepoint = (board: number[][]) => {
+  return board.flat(2).filter((x) => x === 2).length;
+};
+
 ///勝者判断処理
 const whoWin = (stonesNum: number[]) => {
   const black = stonesNum[0];
@@ -124,7 +132,6 @@ const checkFinishProcessing = (argBoard: number[][], argstonesNum: number[], arg
 
 const Home = () => {
   const [turnColor, changeTurnColor] = useState(1); //カラー
-  const [stonesNum, recordStonesNum] = useState([2, 2]); //カラー 石の数を数える。0:黒 1:白
   const [turn, recordTurnNum] = useState<number>(1); // ターン数計測
   const [comPassCount, stackComPassCount] = useState<number>(0); //コンピューターがパスした数をカウント
   const [userPassCount, stackUserPassCount] = useState<number>(0); //ユーザーがパスした数をカウント
@@ -155,6 +162,11 @@ const Home = () => {
     [0, 0, 0, 0, 0, 0, 0, 0],
   ]);
 
+  const bP = calcblackpoint(board);
+  const wP = calcwhitepoint(board);
+
+  const pointlst = useMemo(() => [bP, wP], [bP, wP]);
+
   /// 石を置いたときに発生する石の増減をカウントする処理(user.com併用)
   const increaseStoneNum = useCallback((count: number, color: number, argstonesnum: number[]) => {
     if (color === 1) {
@@ -175,18 +187,17 @@ const Home = () => {
       argBoard: number[][],
       color: number,
     ) => {
-      const retstonesNum = increaseStoneNum(allcount, color, stonesNum);
+      const retstonesNum = increaseStoneNum(allcount, color, pointlst);
       console.log(retstonesNum);
       argBoard[y][x] = color;
 
       count_lst.forEach((value, index) => {
         InversionProcessing(x, y, value, dirLst[index], argBoard, color);
       });
-      recordStonesNum(retstonesNum);
 
       return retstonesNum;
     },
-    [increaseStoneNum, stonesNum],
+    [increaseStoneNum, pointlst],
   );
 
   const passProcess = (
@@ -253,7 +264,11 @@ const Home = () => {
       setBoard(markedBoard);
     }
     if (result !== 2) {
-      checkFinishProcessing(markedBoard, argstonesNum, turn);
+      checkFinishProcessing(
+        markedBoard,
+        [calcblackpoint(markedBoard), calcwhitepoint(markedBoard)],
+        turn,
+      );
       recordTurnNum((prev) => prev + 1);
     }
   };
@@ -261,7 +276,7 @@ const Home = () => {
   /// クリックしたときの総処理(user専用)
   const clickHandler = (x: number, y: number) => {
     const newBoard = structuredClone(board);
-    passProcess(board, turnColor, stonesNum, userPassCount, comPassCount);
+    passProcess(board, turnColor, pointlst, userPassCount, comPassCount);
     const count_lst = searchCount(x, y, dirLst, newBoard, turnColor);
     const allcount = count_lst.reduce((acc, value) => acc + value, 0);
     if (newBoard[y][x] <= 0 && allcount > 0) {
@@ -282,7 +297,7 @@ const Home = () => {
   /// 起動時に行う処理
   const didInit = useRef(false);
   if (!didInit.current) {
-    changeTurnProcessing(board, turn, stonesNum);
+    changeTurnProcessing(board, turn, pointlst);
     didInit.current = true;
   }
 
@@ -296,12 +311,12 @@ const Home = () => {
             src="https://chicodeza.com/wordpress/wp-content/uploads/osero-illust1.png"
             width="20wv"
           />
-          :{stonesNum[0]}{' '}
+          :{bP}{' '}
           <img
             src="https://chicodeza.com/wordpress/wp-content/uploads/osero-illust2.png"
             width="20wv"
           />
-          :{stonesNum[1]}
+          :{wP}
         </div>
       </div>
       <div className={styles.board}>
@@ -336,14 +351,14 @@ const Home = () => {
                 src="https://chicodeza.com/wordpress/wp-content/uploads/osero-illust1.png"
                 width="20wv"
               />
-              <p className={styles.scoreElement}>:{stonesNum[0]}</p>
+              <p className={styles.scoreElement}>:{pointlst[0]}</p>
             </div>
             <div className={styles.scorecontent}>
               <img
                 src="https://chicodeza.com/wordpress/wp-content/uploads/osero-illust2.png"
                 width="20wv"
               />
-              <p className={styles.scoreElement}>:{stonesNum[1]}</p>
+              <p className={styles.scoreElement}>:{pointlst[1]}</p>
             </div>
             <div className={styles.smartphone} />
           </div>
